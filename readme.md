@@ -1,29 +1,64 @@
 * **Website**
   * **Owner**
     * AI overview🔴
-    * Manage listings 🟢
-    * Manage Storefronts 🟢
-    * Manage workers 🟢
-    * Manage storefronts 🟢
-    * View all orders & audit logs 🟡
-    * Invoices & platform analytics 🟡
-    * Tracking 🔴
+    * Listings
+      * Add 🟢
+      * Remove 🟢
+      * Edit 🟢
+      * Manage coupons/discounts 🔴
+    * Manage Storefronts
+      * Add 🟢
+      * Edit 🟢
+      * Remove 🟢
+      * Set status 🟢
+    * Workers
+      * Add 🟢
+      * Revoke 🟢
+      * Set status 🟢
+    * Orders 
+      * View 🟢
+      * Set status🔴
+      * Receipts/invoice 🔴
+      * Tracking 🔴
   * **Storefront**
-    * AI Overview🔴
-    * Manage listings 🟢
-    * Review & approve orders
-    * Invoices & sales history
-    * Tracking 🔴
+    * AI Overview 🔴
+    * Listings
+      * Add 🟢
+      * Remove 🟢
+      * Edit 🟢
+      * Manage coupons/discounts 🔴
+    * Workers
+      * Add 🟢
+      * Revoke 🟢
+      * Set status 🟢
+    * Orders 
+      * View 🟢
+      * Set status🔴
+      * Receipts/invoice 🔴
+      * Tracking 🔴
   * **Worker**
+    * Listings
+      * Add 🟢
+      * Remove 🟢
+      * Edit 🟢
+    * Orders 
+      * View 🟢
+      * Set status🔴
+      * Receipts/invoice 🔴
+      * Tracking 🔴
     * Scanner (camera QR/barcode scan) 🔴
-    * Manage order status (Pick, Pack, Ready) 🟡
-    * Quick inventory stock adjustments 🟢
   * **Customer**
-    * AI assistant 🔴
-    * View listings 🟢
-    * Place order 🟡
-    * Invoices & order history 🟡
-    * Tracking 🔴
+    * AI assistant / chat support 🔴
+    * Listings
+      * Sort 🔴
+      * Filters 🔴
+      * Add to cart 🟡
+      * Coupons/discounts 🔴
+    * Orders
+      * View history 🔴
+      * Receipts/invoices 🟡
+      * Track 🟡
+      * Refund/cancel 🔴
    
 🟢: implemented  
 🟡: partially implemented  

@@ -744,6 +744,38 @@
 
         /* --- LISTINGS --- */
 
+        let sortState = { key: null, dir: 1};
+
+        function sortItems(items)
+        {
+            if (!sortState.key) return items;
+            const { key, dir } = sortState;
+
+            return [...items].sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+
+                if (key === 'price')
+                {
+                    valA = parseFloat(valA) || 0;
+                    valB = parseFloat(valB) || 0;
+                }
+                else if (key === 'stock') 
+                {
+                    valA = parseInt(valA) || 0;
+                    valB = parseInt(valB) || 0;
+                }
+                else
+                {
+                    valA = (valA || '').toString().toLowerCase();
+                    valB = (valB || '').toString().toLowerCase();
+                }
+                
+                if (valA < valB) return -1 * dir;
+                if (valA > valB) return 1 * dir;
+            });
+        }
+
         function renderListings() {
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const filterSf = document.getElementById('filter-storefront').value;

@@ -781,7 +781,7 @@
             const filterSf = document.getElementById('filter-storefront').value;
             const tbody = document.getElementById('listings-tbody');
 
-            const itemsList = state.listings.filter(i => {
+            let itemsList = state.listings.filter(i => {
                 const title = (i.title || '').toLowerCase();
                 const sku = (i.sku || '').toLowerCase();
                 const matchSearch = title.includes(search) || sku.includes(search);

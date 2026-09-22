@@ -810,6 +810,24 @@
                 });
             }
 
+            document.querySelectorAll('[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.sort;
+                    if (sortState.key === key)
+                    {
+                        sortState.dir *= -1;
+                    }
+                    else
+                    {
+                        sortState.key = key;
+                        sortState.dir = 1;
+                    }
+
+                    updateSortIcons();
+                    renderListings();
+                })
+            });
+
             document.getElementById('stat-total').textContent = state.listings.length;
             document.getElementById('stat-low').textContent = state.listings.filter(i => i.stock > 0 && i.stock < 10).length;
             document.getElementById('stat-units').textContent = state.listings.reduce((acc, curr) => acc + (parseInt(curr.stock, 10) || 0), 0);

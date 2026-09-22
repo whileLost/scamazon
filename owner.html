@@ -745,7 +745,6 @@
         /* --- LISTINGS --- */
 
         let sortState = { key: null, dir: 1};
-
         function sortItems(items)
         {
             if (!sortState.key) return items;
@@ -776,6 +775,43 @@
             });
         }
 
+        function updateSortIcons()
+        {
+            document.querySelectorAll('[data-sort]').forEach(th => {
+                const icon = th.querySelector('.sort-icon');
+                if (th.dataset.sort === sortState.key)
+                {
+                    icon.textContent = sortState.dir === 1 ? '↑' : '↓';
+                    icon.classList.remove('text-slate-300');
+                    icon.classList.add('text-slate-600');
+                }
+                else
+                {
+                    icon.textContent = '↕';
+                    icon.classList.remove('text-slate-600');
+                    icon.classList.add('text-slate-300');
+                }
+            });
+        }
+
+        document.querySelectorAll('[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                if (sortState.key === key)
+                {
+                    sortState.dir *= -1;
+                }
+                else
+                {
+                    sortState.key = key;
+                    sortState.dir = 1;
+                }
+
+                updateSortIcons();
+                renderListings();
+            })
+        });
+
         function renderListings() {
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const filterSf = document.getElementById('filter-storefront').value;
@@ -790,43 +826,6 @@
             });
 
             itemsList = sortItems(itemsList);
-
-            function updateSortIcons()
-            {
-                document.querySelectorAll('[data-sort]').forEach(th => {
-                    const icon = th.querySelector('.sort-icon');
-                    if (th.dataset.sort === sortState.key)
-                    {
-                        icon.textContent = sortState.dir === 1 ? '↑' : '↓';
-                        icon.classList.remove('text-slate-300');
-                        icon.classList.add('text-slate-600');
-                    }
-                    else
-                    {
-                        icon.textContent = '↕';
-                        icon.classList.remove('text-slate-600');
-                        icon.classList.add('text-slate-300');
-                    }
-                });
-            }
-
-            document.querySelectorAll('[data-sort]').forEach(th => {
-                th.addEventListener('click', () => {
-                    const key = th.dataset.sort;
-                    if (sortState.key === key)
-                    {
-                        sortState.dir *= -1;
-                    }
-                    else
-                    {
-                        sortState.key = key;
-                        sortState.dir = 1;
-                    }
-
-                    updateSortIcons();
-                    renderListings();
-                })
-            });
 
             document.getElementById('stat-total').textContent = state.listings.length;
             document.getElementById('stat-low').textContent = state.listings.filter(i => i.stock > 0 && i.stock < 10).length;

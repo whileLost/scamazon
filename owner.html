@@ -104,11 +104,21 @@
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold text-xs uppercase tracking-wider">
                                 <tr>
-                                    <th class="py-3 px-4">Item</th>
-                                    <th class="py-3 px-4">SKU</th>
-                                    <th class="py-3 px-4">Storefront</th>
-                                    <th class="py-3 px-4">Price</th>
-                                    <th class="py-3 px-4">Stock</th>
+                                    <th class="py-3 px-4 cursor-pointer select-none hover:text-slate-700" data-sort="item">
+                                        Item <span class="sort-icon text-slate-300">↕</span>
+                                    </th>
+                                    <th class="py-3 px-4 cursor-pointer select-none hover:text-slate-700" data-sort="sku">
+                                        SKU <span class="sort-icon text-slate-300">↕</span>
+                                    </th>
+                                    <th class="py-3 px-4 cursor-pointer select-none hover:text-slate-700" data-sort="storefront">
+                                        Storefront <span class="sort-icon text-slate-300">↕</span>
+                                    </th>
+                                    <th class="py-3 px-4 cursor-pointer select-none hover:text-slate-700" data-sort="price">
+                                        Price <span class="sort-icon text-slate-300">↕</span>
+                                    </th>
+                                    <th class="py-3 px-4 cursor-pointer select-none hover:text-slate-700" data-sort="stock">
+                                        Stock <span class="sort-icon text-slate-300">↕</span>
+                                    </th>
                                     <th class="py-3 px-4 text-right">Actions</th>
                                 </tr>
                             </thead>

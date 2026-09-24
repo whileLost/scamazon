@@ -210,5 +210,24 @@
         </div>
     </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const scrollerContent = document.getElementById('scroller-content');
+
+            if (scrollerContent)
+            {
+                const duplicatedContent = scrollerContent.innerHTML;
+
+                scrollerContent.insertAdjacentHTML('beforeend', duplicatedContent);
+
+                scrollerContent.addEventListener('mouseover', () => {
+                    scrollerContent.style.animationPlayState = 'paused';
+                });
+                scrollerContent.addEventListener('mouseout', () => {
+                    scrollerContent.style.animationPlayState = 'running';
+                });
+            }
+        });
+    </script>
 </body>
 </html>

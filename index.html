@@ -19,7 +19,18 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                    }
+                    },
+
+                    animation: {
+                        'infinite-scroll': 'infinite-scroll 30s linear infinite',
+                    },
+                    
+                    keyframes: {
+                        'infinite-scroll': {
+                            from: { transform: 'translateX(0)' },
+                            to: { transform: 'translateX(-100%)' },
+                        }
+                    },
                 }
             }
         }
@@ -138,7 +149,11 @@
                 <p class="mt-4 text-lg text-slate-600">Hear how our services benefit our clients.</p>
             </div>
 
-            
+            <div class="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
+                <ul id="scroller-content" class="flex items-center justify-center md:justify-start [&_li]:mx-4 animate-infinite-scroll">
+                    
+                </ul>
+            </div>
         </section>
     </main>
 

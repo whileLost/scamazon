@@ -992,24 +992,21 @@
             showModal('storefront-modal');
         }
 
-        async function removeStorefront(id, name) {
-            const attached = state.listings.filter(l => l.storefront === name);
-            if (attached.length > 0) {
-                if (!confirm(`WARNING: ${name} still has ${attached.length} active listings!\n\nIf you delete this location, those listings will become unassigned. Are you sure you want to proceed?`)) return;
-            } else {
-                if (!confirm(`Permanently delete location: ${name}?`)) return;
-            }
-            
-            try {
+        function removeStorefront(id, name) {
+            const sfName = name || state.storefronts.find(x => x.id === id)?.name || 'this storefront';
+            const attached = state.listings.filter(l => l.storefront === sfName);
+
+            const message = attached.length > 0
+                ? `WARNING: "${sfName}" still has ${attached.length} active listing(s). If you delete this location, those listings will become unassigned. Are you sure you want to proceed?`
+                : `Are you sure you want to permanently delete location "${sfName}"? This action cannot be undone.`;
+
+            askDelete('Delete Storefront', message, async () => {
                 const { error } = await client.from('storefronts').delete().eq('id', id);
                 if (error) throw error;
                 state.storefronts = state.storefronts.filter(x => x.id !== id);
                 syncDropdowns();
                 renderStorefronts();
-            } catch (err) {
-                console.error(err);
-                alert("Failed to delete storefront.");
-            }
+            });
         }
 
         document.getElementById('storefront-form').addEventListener('submit', async (e) => {

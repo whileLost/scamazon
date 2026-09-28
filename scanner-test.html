@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner Test</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white w-full max-w-lg rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">
+                Barcode Scanner Test
+            </h1>
+
+            <p class="text-sm text-slate-500 mt-1">
+                Test database only — GameFlop
+            </p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-2">
+                Barcode / SKU
+            </label>
+
+            <input
+                id="barcode-input"
+                type="text"
+                placeholder="Enter barcode..."
+                class="w-full border border-slate-300 rounded-lg px-3 py-2"
+            >
+        </div>
+
+        <button
+            id="lookup-btn"
+            class="w-full bg-slate-900 text-white font-semibold rounded-lg px-4 py-2 hover:bg-slate-800"
+        >
+            Find Product
+        </button>
+
+        <div id="message" class="text-sm"></div>
+
+        <div
+            id="product-card"
+            class="hidden border border-slate-200 rounded-xl p-5 space-y-2"
+        >
+            <h2 id="product-title" class="text-xl font-bold"></h2>
+
+            <p>
+                <strong>SKU:</strong>
+                <span id="product-sku"></span>
+            </p>
+
+            <p>
+                <strong>Price:</strong>
+                $<span id="product-price"></span>
+            </p>
+
+            <p>
+                <strong>Stock:</strong>
+                <span id="product-stock"></span>
+            </p>
+
+            <p>
+                <strong>Storefront:</strong>
+                <span id="product-storefront"></span>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        const client = window.supabase.createClient(
+            'https://vdubvwtbtgcczkywmxyo.supabase.co',
+            'sb_publishable_G7TkfNT18Gkm-sLrl4AlGg_xxE6oEhP'
+        );
+
+        const TEST_STOREFRONT = 'GameFlop';
+
+        async function lookupBarcode() {
+
+            const barcode = document
+                .getElementById('barcode-input')
+                .value
+                .trim();
+
+            const message = document.getElementById('message');
+            const productCard = document.getElementById('product-card');
+
+            productCard.classList.add('hidden');
+            message.textContent = '';
+
+            if (!barcode) {
+                message.textContent = 'Enter a barcode first.';
+                message.className = 'text-sm text-amber-600';
+                return;
+            }
+
+            const { data, error } = await client
+                .from('listings')
+                .select('*')
+                .eq('sku', barcode)
+                .eq('storefront', TEST_STOREFRONT)
+                .maybeSingle();
+
+            if (error) {
+                console.error(error);
+                message.textContent = 'Database error: ' + error.message;
+                message.className = 'text-sm text-red-600';
+                return;
+            }
+
+            if (!data) {
+                message.textContent =
+                    'No product found for this barcode at ' +
+                    TEST_STOREFRONT +
+                    '.';
+
+                message.className = 'text-sm text-red-600';
+                return;
+            }
+
+            document.getElementById('product-title').textContent =
+                data.title;
+
+            document.getElementById('product-sku').textContent =
+                data.sku;
+
+            document.getElementById('product-price').textContent =
+                Number(data.price).toFixed(2);
+
+            document.getElementById('product-stock').textContent =
+                data.stock;
+
+            document.getElementById('product-storefront').textContent =
+                data.storefront;
+
+            productCard.classList.remove('hidden');
+
+            message.textContent = 'Product found.';
+            message.className = 'text-sm text-green-600';
+        }
+
+        document
+            .getElementById('lookup-btn')
+            .addEventListener('click', lookupBarcode);
+
+        document
+            .getElementById('barcode-input')
+            .addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    lookupBarcode();
+                }
+            });
+    </script>
+
+</body>
+</html>

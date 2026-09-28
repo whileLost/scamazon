@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Barcode Scanner Test</title>
 
+    <!-- Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Supabase connection library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Camera barcode / QR scanner library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
@@ -23,6 +31,8 @@
             </p>
         </div>
 
+
+        <!-- Barcode can be typed manually or filled automatically by camera -->
         <div>
             <label class="block text-sm font-semibold mb-2">
                 Barcode / SKU
@@ -36,6 +46,8 @@
             >
         </div>
 
+
+        <!-- Manual database lookup -->
         <button
             id="lookup-btn"
             class="w-full bg-slate-900 text-white font-semibold rounded-lg px-4 py-2 hover:bg-slate-800"
@@ -43,13 +55,48 @@
             Find Product
         </button>
 
-        <div id="message" class="text-sm"></div>
 
+        <!-- Opens webcam and begins looking for barcode -->
+        <button
+            id="scan-btn"
+            class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700"
+        >
+            Scan Barcode
+        </button>
+
+
+        <!-- Only visible while camera is running -->
+        <button
+            id="stop-scan-btn"
+            class="hidden w-full bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-2 hover:bg-slate-300"
+        >
+            Stop Scanner
+        </button>
+
+
+        <!-- Webcam preview appears here -->
+        <div
+            id="reader"
+            class="hidden mt-4 overflow-hidden rounded-lg"
+        ></div>
+
+
+        <!-- Success / error messages -->
+        <div
+            id="message"
+            class="text-sm"
+        ></div>
+
+
+        <!-- Product returned from Supabase -->
         <div
             id="product-card"
             class="hidden border border-slate-200 rounded-xl p-5 space-y-2"
         >
-            <h2 id="product-title" class="text-xl font-bold"></h2>
+            <h2
+                id="product-title"
+                class="text-xl font-bold text-slate-900"
+            ></h2>
 
             <p>
                 <strong>SKU:</strong>
@@ -74,13 +121,23 @@
 
     </div>
 
+
     <script>
+
+        // Connect only to our separate TEST Supabase project.
         const client = window.supabase.createClient(
             'https://vdubvwtbtgcczkywmxyo.supabase.co',
             'sb_publishable_G7TkfNT18Gkm-sLrl4AlGg_xxE6oEhP'
         );
 
+
+        // For testing we are pretending the worker belongs to GameFlop.
         const TEST_STOREFRONT = 'GameFlop';
+
+
+        // ---------------------------------------------------------
+        // LOOK UP PRODUCT USING BARCODE / SKU
+        // ---------------------------------------------------------
 
         async function lookupBarcode() {
 
@@ -89,18 +146,37 @@
                 .value
                 .trim();
 
-            const message = document.getElementById('message');
-            const productCard = document.getElementById('product-card');
+            const message =
+                document.getElementById('message');
 
+            const productCard =
+                document.getElementById('product-card');
+
+
+            // Hide any previous result.
             productCard.classList.add('hidden');
             message.textContent = '';
 
+
             if (!barcode) {
-                message.textContent = 'Enter a barcode first.';
-                message.className = 'text-sm text-amber-600';
+                message.textContent =
+                    'Enter or scan a barcode first.';
+
+                message.className =
+                    'text-sm text-amber-600';
+
                 return;
             }
 
+
+            message.textContent =
+                'Searching for product...';
+
+            message.className =
+                'text-sm text-slate-500';
+
+
+            // Search by both SKU and worker storefront.
             const { data, error } = await client
                 .from('listings')
                 .select('*')
@@ -108,23 +184,36 @@
                 .eq('storefront', TEST_STOREFRONT)
                 .maybeSingle();
 
+
             if (error) {
                 console.error(error);
-                message.textContent = 'Database error: ' + error.message;
-                message.className = 'text-sm text-red-600';
+
+                message.textContent =
+                    'Database error: ' + error.message;
+
+                message.className =
+                    'text-sm text-red-600';
+
                 return;
             }
+
 
             if (!data) {
                 message.textContent =
-                    'No product found for this barcode at ' +
+                    'No product found for barcode ' +
+                    barcode +
+                    ' at ' +
                     TEST_STOREFRONT +
                     '.';
 
-                message.className = 'text-sm text-red-600';
+                message.className =
+                    'text-sm text-red-600';
+
                 return;
             }
 
+
+            // Fill product information.
             document.getElementById('product-title').textContent =
                 data.title;
 
@@ -140,24 +229,241 @@
             document.getElementById('product-storefront').textContent =
                 data.storefront;
 
+
             productCard.classList.remove('hidden');
 
-            message.textContent = 'Product found.';
-            message.className = 'text-sm text-green-600';
+            message.textContent =
+                'Product found.';
+
+            message.className =
+                'text-sm text-green-600';
         }
 
+
+        // Manual Find Product button.
         document
             .getElementById('lookup-btn')
             .addEventListener('click', lookupBarcode);
 
+
+        // Pressing Enter in the barcode box also searches.
         document
             .getElementById('barcode-input')
             .addEventListener('keydown', (event) => {
+
                 if (event.key === 'Enter') {
                     lookupBarcode();
                 }
+
             });
+
+
+
+        // ---------------------------------------------------------
+        // CAMERA BARCODE SCANNER
+        // ---------------------------------------------------------
+
+        let scanner = null;
+        let scannerRunning = false;
+        let handlingScan = false;
+
+
+        async function startScanner() {
+
+            const reader =
+                document.getElementById('reader');
+
+            const message =
+                document.getElementById('message');
+
+            const scanButton =
+                document.getElementById('scan-btn');
+
+            const stopButton =
+                document.getElementById('stop-scan-btn');
+
+
+            // Prevent opening multiple scanner sessions.
+            if (scannerRunning) {
+                return;
+            }
+
+
+            reader.classList.remove('hidden');
+            scanButton.classList.add('hidden');
+            stopButton.classList.remove('hidden');
+
+            message.textContent =
+                'Starting camera...';
+
+            message.className =
+                'text-sm text-slate-500';
+
+
+            try {
+
+                if (!scanner) {
+                    scanner = new Html5Qrcode('reader');
+                }
+
+
+                scannerRunning = true;
+
+
+                await scanner.start(
+
+                    // Prefer rear camera on mobile.
+                    // On desktop this will normally use the webcam.
+                    {
+                        facingMode: 'environment'
+                    },
+
+                    {
+                        fps: 10,
+
+                        qrbox: {
+                            width: 300,
+                            height: 150
+                        }
+                    },
+
+
+                    // Barcode successfully detected.
+                    async (decodedText) => {
+
+                        // Prevent several detections firing at once.
+                        if (handlingScan) {
+                            return;
+                        }
+
+                        handlingScan = true;
+
+
+                        try {
+
+                            // Put detected barcode into input box.
+                            document
+                                .getElementById('barcode-input')
+                                .value = decodedText;
+
+
+                            // Camera is no longer needed after successful scan.
+                            await stopScanner();
+
+
+                            // Automatically search Supabase.
+                            await lookupBarcode();
+
+                        } finally {
+
+                            handlingScan = false;
+
+                        }
+                    },
+
+
+                    // Called repeatedly while no barcode is detected.
+                    () => {
+                        // Keep scanning.
+                    }
+
+                );
+
+
+                message.textContent =
+                    'Camera active — hold a barcode in front of the camera.';
+
+                message.className =
+                    'text-sm text-indigo-600';
+
+
+            } catch (error) {
+
+                scannerRunning = false;
+
+                console.error(
+                    'Camera error:',
+                    error
+                );
+
+
+                reader.classList.add('hidden');
+                scanButton.classList.remove('hidden');
+                stopButton.classList.add('hidden');
+
+
+                message.textContent =
+                    'Could not start camera: ' +
+                    error;
+
+                message.className =
+                    'text-sm text-red-600';
+            }
+        }
+
+
+
+        // ---------------------------------------------------------
+        // STOP CAMERA
+        // ---------------------------------------------------------
+
+        async function stopScanner() {
+
+            const reader =
+                document.getElementById('reader');
+
+            const scanButton =
+                document.getElementById('scan-btn');
+
+            const stopButton =
+                document.getElementById('stop-scan-btn');
+
+
+            if (scanner && scannerRunning) {
+
+                try {
+
+                    await scanner.stop();
+
+                } catch (error) {
+
+                    console.error(
+                        'Could not stop scanner:',
+                        error
+                    );
+
+                }
+
+            }
+
+
+            scannerRunning = false;
+
+            reader.classList.add('hidden');
+            scanButton.classList.remove('hidden');
+            stopButton.classList.add('hidden');
+        }
+
+
+
+        // Camera button events.
+        document
+            .getElementById('scan-btn')
+            .addEventListener(
+                'click',
+                startScanner
+            );
+
+
+        document
+            .getElementById('stop-scan-btn')
+            .addEventListener(
+                'click',
+                stopScanner
+            );
+
     </script>
 
 </body>
+
 </html>

@@ -54,16 +54,6 @@
             </span>
         </button>
 
-        <button onclick="switchTab('scanner')" data-tab="scanner"
-            class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
-            Scanner
-
-            <span
-                class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">
-                📷
-            </span>
-        </button>
-
         <button onclick="switchTab('orders')" data-tab="orders"
             class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
             Orders
@@ -77,6 +67,16 @@
         <button onclick="switchTab('sales')" data-tab="sales"
             class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
             Sales & Analytics
+        </button>
+
+        <button onclick="switchTab('scanner')" data-tab="scanner"
+            class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+            Scanner
+
+            <span
+                class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">
+                📷
+            </span>
         </button>
 
     </nav>
@@ -765,12 +765,11 @@
             }
         });
 
-                /* --- BARCODE SCANNER --- */
+        /* --- BARCODE SCANNER --- */
 
         let barcodeScanner = null;
         let barcodeScannerRunning = false;
         let barcodeHandlingScan = false;
-
 
         // Looks for the scanned SKU inside the listings
         // already loaded for the logged-in worker's storefront.
@@ -787,10 +786,8 @@
             const result =
                 document.getElementById('scanner-result');
 
-
             result.classList.add('hidden');
             message.textContent = '';
-
 
             if (!barcode) {
 
@@ -803,11 +800,9 @@
                 return;
             }
 
-
             const item = state.listings.find(listing =>
                 String(listing.sku || '').trim() === barcode
             );
-
 
             if (!item) {
 
@@ -820,32 +815,26 @@
                 return;
             }
 
-
             document.getElementById(
                 'scanner-product-title'
             ).textContent = item.title || 'Unnamed Product';
 
-
             document.getElementById(
                 'scanner-product-sku'
             ).textContent = item.sku || '-';
-
 
             document.getElementById(
                 'scanner-product-price'
             ).textContent =
                 (parseFloat(item.price) || 0).toFixed(2);
 
-
             document.getElementById(
                 'scanner-product-stock'
             ).textContent = item.stock ?? 0;
 
-
             document.getElementById(
                 'scanner-product-storefront'
             ).textContent = item.storefront || '-';
-
 
             result.classList.remove('hidden');
 
@@ -854,7 +843,6 @@
             message.className =
                 'text-sm mt-4 text-emerald-600';
         }
-
 
         async function startBarcodeScanner() {
 
@@ -870,11 +858,9 @@
             const stopButton =
                 document.getElementById('scanner-stop-btn');
 
-
             if (barcodeScannerRunning) {
                 return;
             }
-
 
             reader.classList.remove('hidden');
             startButton.classList.add('hidden');
@@ -886,7 +872,6 @@
             message.className =
                 'text-sm mt-4 text-slate-500';
 
-
             try {
 
                 if (!barcodeScanner) {
@@ -894,9 +879,7 @@
                         new Html5Qrcode('scanner-reader');
                 }
 
-
                 barcodeScannerRunning = true;
-
 
                 await barcodeScanner.start(
 
@@ -921,7 +904,6 @@
 
                         barcodeHandlingScan = true;
 
-
                         try {
 
                             // Put barcode into the input box.
@@ -929,10 +911,8 @@
                                 .getElementById('scanner-barcode-input')
                                 .value = decodedText;
 
-
                             // Stop camera after successful scan.
                             await stopBarcodeScanner();
-
 
                             // Automatically look up the item.
                             findScannedProduct();
@@ -950,13 +930,11 @@
 
                 );
 
-
                 message.textContent =
                     'Camera active — hold a barcode in front of the camera.';
 
                 message.className =
                     'text-sm mt-4 text-indigo-600';
-
 
             } catch (error) {
 
@@ -967,11 +945,9 @@
                     error
                 );
 
-
                 reader.classList.add('hidden');
                 startButton.classList.remove('hidden');
                 stopButton.classList.add('hidden');
-
 
                 message.textContent =
                     'Could not start camera: ' + error;
@@ -980,7 +956,6 @@
                     'text-sm mt-4 text-rose-600';
             }
         }
-
 
         async function stopBarcodeScanner() {
 
@@ -992,7 +967,6 @@
 
             const stopButton =
                 document.getElementById('scanner-stop-btn');
-
 
             if (
                 barcodeScanner &&
@@ -1014,14 +988,12 @@
 
             }
 
-
             barcodeScannerRunning = false;
 
             reader.classList.add('hidden');
             startButton.classList.remove('hidden');
             stopButton.classList.add('hidden');
         }
-
 
         // Manual barcode lookup button.
         document
@@ -1030,7 +1002,6 @@
                 'click',
                 findScannedProduct
             );
-
 
         // Enter key also performs lookup.
         document
@@ -1046,7 +1017,6 @@
                 }
             );
 
-
         // Camera controls.
         document
             .getElementById('scanner-start-btn')
@@ -1054,7 +1024,6 @@
                 'click',
                 startBarcodeScanner
             );
-
 
         document
             .getElementById('scanner-stop-btn')

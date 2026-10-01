@@ -143,97 +143,125 @@
             </section>
             
             <!-- SCANNER TAB -->
-<section id="pane-scanner" class="tab-pane hidden space-y-6">
+            <section id="pane-scanner" class="tab-pane hidden space-y-6">
 
-    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl">
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl">
 
-        <div class="mb-5">
-            <h2 class="text-lg font-bold text-slate-900">
-                Barcode Scanner
-            </h2>
+                    <div class="mb-5">
+                        <h2 class="text-lg font-bold text-slate-900">
+                            Barcode Scanner
+                        </h2>
 
-            <p class="text-sm text-slate-500 mt-1">
-                Scan a barcode to find an item in your storefront.
-            </p>
-        </div>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Scan a barcode to find an item in your storefront.
+                        </p>
+                    </div>
 
-        <div class="space-y-3">
+                    <div class="space-y-3">
 
-            <input
-                id="scanner-barcode-input"
-                type="text"
-                placeholder="Barcode / SKU"
-                class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-            >
+                        <input
+                            id="scanner-barcode-input"
+                            type="text"
+                            placeholder="Barcode / SKU"
+                            class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                        >
 
-            <button
-                id="scanner-lookup-btn"
-                class="w-full bg-slate-900 text-white font-semibold rounded-lg px-4 py-2 hover:bg-slate-800"
-            >
-                Find Product
-            </button>
+                        <button
+                            id="scanner-lookup-btn"
+                            class="w-full bg-slate-900 text-white font-semibold rounded-lg px-4 py-2 hover:bg-slate-800"
+                        >
+                            Find Product
+                        </button>
 
-            <button
-                id="scanner-start-btn"
-                class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700"
-            >
-                Scan Barcode
-            </button>
+                        <button
+                            id="scanner-start-btn"
+                            class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700"
+                        >
+                            Scan Barcode
+                        </button>
 
-            <button
-                id="scanner-stop-btn"
-                class="hidden w-full bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-2 hover:bg-slate-300"
-            >
-                Stop Scanner
-            </button>
+                        <button
+                            id="scanner-stop-btn"
+                            class="hidden w-full bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-2 hover:bg-slate-300"
+                        >
+                            Stop Scanner
+                        </button>
 
-        </div>
+                    </div>
 
-        <!-- Camera preview -->
-        <div
-            id="scanner-reader"
-            class="hidden mt-5 overflow-hidden rounded-xl"
-        ></div>
+                    <!-- Camera preview -->
+                    <div
+                        id="scanner-reader"
+                        class="hidden mt-5 overflow-hidden rounded-xl"
+                    ></div>
 
-        <p
-            id="scanner-message"
-            class="text-sm mt-4"
-        ></p>
+                    <p
+                        id="scanner-message"
+                        class="text-sm mt-4"
+                    ></p>
 
-        <!-- Scanned product -->
-        <div
-            id="scanner-result"
-            class="hidden mt-5 border border-slate-200 rounded-xl p-5 space-y-2"
-        >
-            <h3
-                id="scanner-product-title"
-                class="text-lg font-bold text-slate-900"
-            ></h3>
+                    <!-- Scanned product -->
+                    <div
+                        id="scanner-result"
+                        class="hidden mt-5 border border-slate-200 rounded-xl p-5 flex flex-col sm:flex-row gap-5 items-start"
+                    >
+                        <!-- Listing Image -->
+                        <div
+                            id="scanner-image-container"
+                            class="w-24 h-24 sm:w-28 sm:h-28 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0"
+                        >
+                            <img
+                                id="scanner-product-img"
+                                src=""
+                                alt=""
+                                class="w-full h-full object-cover hidden"
+                                onerror="this.classList.add('hidden'); document.getElementById('scanner-product-img-fallback').classList.remove('hidden');"
+                            >
+                            <div
+                                id="scanner-product-img-fallback"
+                                class="text-xs text-slate-400 font-mono flex flex-col items-center justify-center w-full h-full gap-1 p-2 text-center"
+                            >
+                                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span>No Image</span>
+                            </div>
+                        </div>
 
-            <p class="text-sm">
-                <strong>SKU:</strong>
-                <span id="scanner-product-sku"></span>
-            </p>
+                        <!-- Listing Details -->
+                        <div class="flex-1 space-y-2 min-w-0">
+                            <h3
+                                id="scanner-product-title"
+                                class="text-lg font-bold text-slate-900 leading-snug"
+                            ></h3>
 
-            <p class="text-sm">
-                <strong>Price:</strong>
-                $<span id="scanner-product-price"></span>
-            </p>
+                            <div class="space-y-1 text-sm">
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">SKU:</strong>
+                                    <span id="scanner-product-sku"></span>
+                                </p>
 
-            <p class="text-sm">
-                <strong>Stock:</strong>
-                <span id="scanner-product-stock"></span>
-            </p>
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">Price:</strong>
+                                    $<span id="scanner-product-price"></span>
+                                </p>
 
-            <p class="text-sm">
-                <strong>Storefront:</strong>
-                <span id="scanner-product-storefront"></span>
-            </p>
-        </div>
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">Stock:</strong>
+                                    <span id="scanner-product-stock"></span>
+                                </p>
 
-    </div>
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">Storefront:</strong>
+                                    <span id="scanner-product-storefront"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
-</section>
+                </div>
+
+            </section>
 
             <!-- ORDERS TAB -->
             <section id="pane-orders" class="tab-pane hidden space-y-6">
@@ -808,6 +836,21 @@
                     'text-sm mt-4 text-rose-600';
 
                 return;
+            }
+
+            // Populate Product Image
+            const imgEl = document.getElementById('scanner-product-img');
+            const fallbackEl = document.getElementById('scanner-product-img-fallback');
+
+            if (item.image_url) {
+                imgEl.src = item.image_url;
+                imgEl.alt = item.title || 'Product Image';
+                imgEl.classList.remove('hidden');
+                if (fallbackEl) fallbackEl.classList.add('hidden');
+            } else {
+                imgEl.src = '';
+                imgEl.classList.add('hidden');
+                if (fallbackEl) fallbackEl.classList.remove('hidden');
             }
 
             document.getElementById(

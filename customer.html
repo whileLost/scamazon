@@ -38,7 +38,7 @@
         <nav class="flex-1 p-3 space-y-1 text-sm font-medium overflow-y-auto">
             <button onclick="switchTab('catalog')" id="nav-catalog" class="w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10">
                 Listings
-                <span id="cart-badge" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono transition-all duration-200 inline-block">0</span>
+                <span id="badge-listings" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono transition-all duration-200 inline-block">0</span>
             </button>
             <button onclick="switchTab('tracking')" id="nav-tracking" class="w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900">
                 Tracking & Invoices
@@ -71,7 +71,7 @@
                             <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </div>
                     </div>
-                    <button onclick="toggleCartDrawer()" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 hover:-translate-y-0.5 shadow-sm shadow-slate-900/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-150 shrink-0 gap-2">
+                    <button onclick="toggleCartDrawer(true)" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 hover:-translate-y-0.5 shadow-sm shadow-slate-900/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-150 shrink-0 gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         View Cart (<span id="cart-counter" class="transition-all duration-200 inline-block font-mono">0</span>)
                     </button>
@@ -158,18 +158,21 @@
             <p id="toast-title" class="text-xs font-semibold text-slate-100 max-w-[220px] truncate">Item added to cart</p>
             <p class="text-[11px] text-slate-400">Added to your cart</p>
         </div>
-        <button onclick="toggleCartDrawer(); hideCartToast();" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-2 shrink-0">
+        <button onclick="toggleCartDrawer(true); hideCartToast();" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-2 shrink-0">
             View
         </button>
     </div>
 
-    <!-- ================= CART DRAWER ================= -->
-    <div id="cart-drawer" class="hidden fixed inset-0 z-50 overflow-hidden">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="toggleCartDrawer()"></div>
-        <div class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col p-6 border-l border-slate-200">
+    <!-- ================= CART DRAWER (Smooth Slide & Fade) ================= -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden pointer-events-none">
+        <!-- Backdrop: Fades In / Out -->
+        <div id="cart-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 ease-out" onclick="toggleCartDrawer(false)"></div>
+        
+        <!-- Drawer Panel: Slides In / Out from Right Edge -->
+        <div id="cart-panel" class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col p-6 border-l border-slate-200 transform translate-x-full transition-transform duration-300 ease-out pointer-events-auto">
             <div class="flex justify-between items-center border-b border-slate-200 pb-4">
                 <h3 class="text-lg font-bold text-slate-900">Your Cart</h3>
-                <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-slate-600 text-xl leading-none">
+                <button onclick="toggleCartDrawer(false)" class="text-slate-400 hover:text-slate-600 text-xl leading-none">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -283,14 +286,11 @@
             toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
             toast.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
 
-            // Brief scale pulse on cart counters
-            ['cart-badge', 'cart-counter'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.add('scale-125', 'text-emerald-400');
-                    setTimeout(() => el.classList.remove('scale-125', 'text-emerald-400'), 250);
-                }
-            });
+            const counterEl = document.getElementById('cart-counter');
+            if (counterEl) {
+                counterEl.classList.add('scale-125', 'text-emerald-400');
+                setTimeout(() => counterEl.classList.remove('scale-125', 'text-emerald-400'), 250);
+            }
 
             cartToastTimer = setTimeout(() => {
                 hideCartToast();
@@ -303,6 +303,52 @@
             toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
             toast.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
         }
+
+        /* --- SMOOTH CART DRAWER TOGGLE --- */
+        let drawerCloseTimeout = null;
+
+        function toggleCartDrawer(forceState) {
+            const drawer = document.getElementById('cart-drawer');
+            const backdrop = document.getElementById('cart-backdrop');
+            const panel = document.getElementById('cart-panel');
+            if (!drawer || !backdrop || !panel) return;
+
+            const isCurrentlyOpen = panel.classList.contains('translate-x-0');
+            const shouldOpen = forceState !== undefined ? forceState : !isCurrentlyOpen;
+
+            clearTimeout(drawerCloseTimeout);
+
+            if (shouldOpen) {
+                drawer.classList.remove('pointer-events-none');
+                
+                requestAnimationFrame(() => {
+                    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                    backdrop.classList.add('opacity-100', 'pointer-events-auto');
+
+                    panel.classList.remove('translate-x-full');
+                    panel.classList.add('translate-x-0');
+                });
+            } else {
+                backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+
+                panel.classList.remove('translate-x-0');
+                panel.classList.add('translate-x-full');
+
+                drawerCloseTimeout = setTimeout(() => {
+                    if (!panel.classList.contains('translate-x-0')) {
+                        drawer.classList.add('pointer-events-none');
+                    }
+                }, 300);
+            }
+        }
+
+        // Close cart when pressing Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleCartDrawer(false);
+            }
+        });
 
         async function checkSession() {
             const { data: { session } } = await client.auth.getSession();
@@ -361,6 +407,13 @@
             tabs[tab].removeAttribute('hidden');
             navs[tab].className = 'w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10';
             document.getElementById('page-heading').textContent = headings[tab];
+
+            const badgeListings = document.getElementById('badge-listings');
+            if (badgeListings) {
+                badgeListings.className = `text-xs px-2 py-0.5 rounded-md font-mono transition-all duration-200 inline-block ${
+                    tab === 'catalog' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-600'
+                }`;
+            }
         }
 
         // ================= LISTINGS =================
@@ -372,6 +425,8 @@
         async function fetchListings() {
             const { data } = await client.from('listings').select('*');
             allListings = data || [];
+            const badge = document.getElementById('badge-listings');
+            if (badge) badge.textContent = allListings.length;
         }
 
         function populateStorefrontDropdown() {
@@ -385,6 +440,9 @@
             const container = document.getElementById('catalog-grid');
             const selectedBranch = document.getElementById('catalog-storefront').value;
             const searchTerm = document.getElementById('catalog-search').value.toLowerCase().trim();
+
+            const badge = document.getElementById('badge-listings');
+            if (badge) badge.textContent = allListings.length;
 
             const branchItems = allListings.filter(l => {
                 const matchesBranch = !selectedBranch || l.storefront === selectedBranch;
@@ -454,7 +512,6 @@
         function updateCartUI() {
             const count = cart.reduce((sum, i) => sum + i.qty, 0);
             document.getElementById('cart-counter').textContent = count;
-            document.getElementById('cart-badge').textContent = count;
 
             const selectedBranch = document.getElementById('catalog-storefront').value;
             document.getElementById('cart-storefront-name').textContent = selectedBranch || (cart.length > 0 ? cart[0].storefront : 'All Storefronts');
@@ -498,10 +555,6 @@
             updateCartUI();
         }
 
-        function toggleCartDrawer() {
-            document.getElementById('cart-drawer').classList.toggle('hidden');
-        }
-
         async function placeOrder() {
             const orderBtn = document.getElementById('order-btn');
             orderBtn.disabled = true;
@@ -533,7 +586,7 @@
 
                 cart = [];
                 updateCartUI();
-                toggleCartDrawer();
+                toggleCartDrawer(false);
                 await fetchListings();
                 renderCatalog();
             } catch (err) {

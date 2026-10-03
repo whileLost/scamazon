@@ -802,6 +802,27 @@
             };
         }
         
+        document.getElementById('coupon-form')
+            .addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const message = document.getElementById('coupon-message');
+                message.textContent = '';
+
+                try {
+                    const coupon = getCouponFormData();
+
+                    message.textContent =
+                        `Coupon ${coupon.code} validated successfully. ` +
+                        'Not saved to the database yet.';
+
+                    message.className = 'text-sm mt-4 text-emerald-600';
+
+                } catch (error) {
+                    message.textContent = error.message;
+                    message.className = 'text-sm mt-4 text-rose-600';
+                }
+            });
         // ==========================================
         // SALES & ANALYTICS
         // ==========================================

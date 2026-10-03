@@ -38,7 +38,7 @@
         <nav class="flex-1 p-3 space-y-1 text-sm font-medium overflow-y-auto">
             <button onclick="switchTab('catalog')" id="nav-catalog" class="w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10">
                 Listings
-                <span id="cart-badge" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono">0</span>
+                <span id="cart-badge" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono transition-all duration-200 inline-block">0</span>
             </button>
             <button onclick="switchTab('tracking')" id="nav-tracking" class="w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900">
                 Tracking & Invoices
@@ -73,7 +73,7 @@
                     </div>
                     <button onclick="toggleCartDrawer()" class="inline-flex items-center justify-center px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 hover:-translate-y-0.5 shadow-sm shadow-slate-900/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-150 shrink-0 gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        View Cart (<span id="cart-counter">0</span>)
+                        View Cart (<span id="cart-counter" class="transition-all duration-200 inline-block font-mono">0</span>)
                     </button>
                 </div>
 
@@ -147,6 +147,20 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- ================= ADDED TO CART TOAST NOTIFICATION ================= -->
+    <div id="cart-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 ease-out flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700/60">
+        <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div class="min-w-0 pr-2">
+            <p id="toast-title" class="text-xs font-semibold text-slate-100 max-w-[220px] truncate">Item added to cart</p>
+            <p class="text-[11px] text-slate-400">Added to your cart</p>
+        </div>
+        <button onclick="toggleCartDrawer(); hideCartToast();" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-2 shrink-0">
+            View
+        </button>
     </div>
 
     <!-- ================= CART DRAWER ================= -->
@@ -243,6 +257,7 @@
         let allListings = [];
         let cart = [];
         let trackedOrderCache = null;
+        let cartToastTimer = null;
 
         function sanitizeHtml(str) {
             if (!str && str !== 0) return '';
@@ -252,6 +267,41 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        function showCartToast(title) {
+            const toast = document.getElementById('cart-toast');
+            const titleEl = document.getElementById('toast-title');
+            if (!toast) return;
+
+            if (titleEl) {
+                titleEl.textContent = title ? `Added "${title}"` : 'Item added to cart';
+            }
+
+            clearTimeout(cartToastTimer);
+            toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+
+            // Brief scale pulse on cart counters
+            ['cart-badge', 'cart-counter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('scale-125', 'text-emerald-400');
+                    setTimeout(() => el.classList.remove('scale-125', 'text-emerald-400'), 250);
+                }
+            });
+
+            cartToastTimer = setTimeout(() => {
+                hideCartToast();
+            }, 2600);
+        }
+
+        function hideCartToast() {
+            const toast = document.getElementById('cart-toast');
+            if (!toast) return;
+            toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+            toast.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
         }
 
         async function checkSession() {
@@ -388,11 +438,14 @@
             if (existing) {
                 if (existing.qty < item.stock) {
                     existing.qty += 1;
+                    showCartToast(item.title);
                 } else {
                     alert('Cannot add more units than are physically in stock.');
+                    return;
                 }
             } else {
                 cart.push({ ...item, qty: 1 });
+                showCartToast(item.title);
             }
 
             updateCartUI();

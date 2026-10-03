@@ -46,7 +46,7 @@
       * Set status🔴
       * Receipts/invoice 🔴
       * Tracking 🔴
-    * Scanner (camera QR/barcode scan) 🔴
+    * Scanner (camera QR/barcode scan) 🟢
   * **Customer**
     * AI assistant / chat support 🔴
     * Listings

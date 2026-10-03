@@ -24,31 +24,58 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased flex h-screen overflow-hidden selection:bg-slate-900 selection:text-white">
     
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
-        <div class="p-4 h-16 border-b border-slate-200 flex items-center justify-between">
-            <a href="index.html" class="text-lg font-bold tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
-                Scamazon<span class="text-indigo-600">.</span>
-            </a>
-            <span class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">worker</span>
-        </div>
-        <nav class="flex-1 p-3 space-y-1 text-sm font-medium overflow-y-auto" id="sidebar-nav">
-            <button onclick="switchTab('listings')" data-tab="listings" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10 transition-all">
-                Listings
-                <span id="badge-listings" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono">0</span>
-            </button>
-            <button onclick="switchTab('orders')" data-tab="orders" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
-                Orders
-                <span id="badge-orders" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
-            </button>
-            <button onclick="switchTab('sales')" data-tab="sales" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
-                Sales & Analytics
-            </button>
-        </nav>
-    </aside>
+ <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
+    <div class="p-4 h-16 border-b border-slate-200 flex items-center justify-between">
+        <a href="index.html"
+            class="text-lg font-bold tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
+            Scamazon<span class="text-indigo-600">.</span>
+        </a>
+
+        <span
+            class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">
+            worker
+        </span>
+    </div>
+
+    <nav class="flex-1 p-3 space-y-1 text-sm font-medium overflow-y-auto" id="sidebar-nav">
+
+        <button onclick="switchTab('listings')" data-tab="listings"
+            class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10 transition-all">
+            Listings
+
+            <span id="badge-listings"
+                class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono">
+                0
+            </span>
+        </button>
+
+        <button onclick="switchTab('orders')" data-tab="orders"
+            class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+            Orders
+
+            <span id="badge-orders"
+                class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">
+                0
+            </span>
+        </button>
+
+        <button onclick="switchTab('sales')" data-tab="sales"
+            class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+            Sales & Analytics
+        </button>
+
+        <button onclick="switchTab('scanner')" data-tab="scanner"
+            class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+            Scanner
+        </button>
+
+    </nav>
+</aside>
 
     <div class="flex-1 flex flex-col h-full overflow-hidden">
         <!-- Top Navigation / Header -->
@@ -113,6 +140,127 @@
                         </table>
                     </div>
                 </div>
+            </section>
+            
+            <!-- SCANNER TAB -->
+            <section id="pane-scanner" class="tab-pane hidden space-y-6">
+
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 max-w-2xl">
+
+                    <div class="mb-5">
+                        <h2 class="text-lg font-bold text-slate-900">
+                            Barcode Scanner
+                        </h2>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            Scan a barcode to find an item in your storefront.
+                        </p>
+                    </div>
+
+                    <div class="space-y-3">
+
+                        <input
+                            id="scanner-barcode-input"
+                            type="text"
+                            placeholder="Barcode / SKU"
+                            class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                        >
+
+                        <button
+                            id="scanner-lookup-btn"
+                            class="w-full bg-slate-900 text-white font-semibold rounded-lg px-4 py-2 hover:bg-slate-800"
+                        >
+                            Find Product
+                        </button>
+
+                        <button
+                            id="scanner-start-btn"
+                            class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            Scan Barcode
+                        </button>
+
+                        <button
+                            id="scanner-stop-btn"
+                            class="hidden w-full bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-2 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            Stop Scanner
+                        </button>
+
+                    </div>
+
+                    <!-- Camera preview -->
+                    <div
+                        id="scanner-reader"
+                        class="hidden mt-5 overflow-hidden rounded-xl"
+                    ></div>
+
+                    <p
+                        id="scanner-message"
+                        class="text-sm mt-4"
+                    ></p>
+
+                    <!-- Scanned product -->
+                    <div
+                        id="scanner-result"
+                        class="hidden mt-5 border border-slate-200 rounded-xl p-5 flex flex-col sm:flex-row gap-5 items-start"
+                    >
+                        <!-- Listing Image -->
+                        <div
+                            id="scanner-image-container"
+                            class="w-24 h-24 sm:w-28 sm:h-28 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0"
+                        >
+                            <img
+                                id="scanner-product-img"
+                                src=""
+                                alt=""
+                                class="w-full h-full object-cover hidden"
+                                onerror="this.classList.add('hidden'); document.getElementById('scanner-product-img-fallback').classList.remove('hidden');"
+                            >
+                            <div
+                                id="scanner-product-img-fallback"
+                                class="text-xs text-slate-400 font-mono flex flex-col items-center justify-center w-full h-full gap-1 p-2 text-center"
+                            >
+                                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span>No Image</span>
+                            </div>
+                        </div>
+
+                        <!-- Listing Details -->
+                        <div class="flex-1 space-y-2 min-w-0">
+                            <h3
+                                id="scanner-product-title"
+                                class="text-lg font-bold text-slate-900 leading-snug"
+                            ></h3>
+
+                            <div class="space-y-1 text-sm">
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">SKU:</strong>
+                                    <span id="scanner-product-sku"></span>
+                                </p>
+
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">Price:</strong>
+                                    $<span id="scanner-product-price"></span>
+                                </p>
+
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">Stock:</strong>
+                                    <span id="scanner-product-stock"></span>
+                                </p>
+
+                                <p class="text-slate-600">
+                                    <strong class="text-slate-800">Storefront:</strong>
+                                    <span id="scanner-product-storefront"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </section>
 
             <!-- ORDERS TAB -->
@@ -401,6 +549,11 @@
         });
 
         function switchTab(tab) {
+            // Stop the camera if the worker leaves the scanner tab
+            if (tab !== 'scanner') {
+                stopBarcodeScanner();
+            }
+            
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
             const targetPane = document.getElementById(`pane-${tab}`);
             if (targetPane) targetPane.classList.remove('hidden');
@@ -420,6 +573,7 @@
 
             const titles = {
                 listings: 'Manage Listings',
+                scanner: 'Barcode Scanner',
                 orders: 'Orders & Fulfillment',
                 sales: 'Sales & Analytics'
             };
@@ -632,6 +786,317 @@
                 btn.disabled = false;
             }
         });
+
+        /* --- BARCODE SCANNER --- */
+
+        let scannerActiveInstance = null;
+        let scannerRunning = false;
+        let barcodeHandlingScan = false;
+        let scannerSessionId = 0;
+        let scannerTransitionPromise = null;
+
+        function resetScannerUI() {
+            const reader = document.getElementById('scanner-reader');
+            const startButton = document.getElementById('scanner-start-btn');
+            const stopButton = document.getElementById('scanner-stop-btn');
+
+            if (reader) reader.classList.add('hidden');
+            if (stopButton) {
+                stopButton.classList.add('hidden');
+                stopButton.disabled = false;
+                stopButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (startButton) {
+                startButton.classList.remove('hidden');
+                startButton.disabled = false;
+                startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        async function cleanupScannerHardware() {
+            if (scannerActiveInstance) {
+                const inst = scannerActiveInstance;
+                scannerActiveInstance = null;
+                try {
+                    const state = typeof inst.getState === 'function' ? inst.getState() : null;
+                    if (state === 2 || state === 3 || inst.isScanning) {
+                        await inst.stop();
+                    }
+                } catch (err) {
+                    console.warn('Gracefully handled scanner stop error:', err);
+                }
+                try {
+                    await inst.clear();
+                } catch (_) {}
+            }
+
+            // Stop all hardware media stream tracks explicitly on all video elements inside #scanner-reader
+            const reader = document.getElementById('scanner-reader');
+            if (reader) {
+                const videos = reader.querySelectorAll('video');
+                videos.forEach(video => {
+                    if (video.srcObject && typeof video.srcObject.getTracks === 'function') {
+                        video.srcObject.getTracks().forEach(track => {
+                            try {
+                                track.stop();
+                            } catch (_) {}
+                        });
+                    }
+                    video.srcObject = null;
+                });
+                reader.innerHTML = '';
+            }
+        }
+
+        // Looks for the scanned SKU inside the listings
+        // already loaded for the logged-in worker's storefront.
+        function findScannedProduct() {
+            const barcode = document
+                .getElementById('scanner-barcode-input')
+                .value
+                .trim();
+
+            const message = document.getElementById('scanner-message');
+            const result = document.getElementById('scanner-result');
+
+            result.classList.add('hidden');
+            message.textContent = '';
+
+            if (!barcode) {
+                message.textContent = 'Enter or scan a barcode first.';
+                message.className = 'text-sm mt-4 text-amber-600';
+                return;
+            }
+
+            const item = state.listings.find(listing =>
+                String(listing.sku || '').trim() === barcode
+            );
+
+            if (!item) {
+                message.textContent = `No product with barcode ${barcode} was found in ${currentWorker.storefront}.`;
+                message.className = 'text-sm mt-4 text-rose-600';
+                return;
+            }
+
+            // Populate Product Image
+            const imgEl = document.getElementById('scanner-product-img');
+            const fallbackEl = document.getElementById('scanner-product-img-fallback');
+
+            if (item.image_url) {
+                imgEl.src = item.image_url;
+                imgEl.alt = item.title || 'Product Image';
+                imgEl.classList.remove('hidden');
+                if (fallbackEl) fallbackEl.classList.add('hidden');
+            } else {
+                imgEl.src = '';
+                imgEl.classList.add('hidden');
+                if (fallbackEl) fallbackEl.classList.remove('hidden');
+            }
+
+            document.getElementById('scanner-product-title').textContent = item.title || 'Unnamed Product';
+            document.getElementById('scanner-product-sku').textContent = item.sku || '-';
+            document.getElementById('scanner-product-price').textContent = (parseFloat(item.price) || 0).toFixed(2);
+            document.getElementById('scanner-product-stock').textContent = item.stock ?? 0;
+            document.getElementById('scanner-product-storefront').textContent = item.storefront || '-';
+
+            result.classList.remove('hidden');
+            message.textContent = 'Product found.';
+            message.className = 'text-sm mt-4 text-emerald-600';
+        }
+
+        async function startBarcodeScanner() {
+            if (scannerRunning) return;
+
+            const startBtn = document.getElementById('scanner-start-btn');
+            const stopBtn = document.getElementById('scanner-stop-btn');
+            const reader = document.getElementById('scanner-reader');
+            const message = document.getElementById('scanner-message');
+
+            // Disable start button immediately and switch button visibility
+            startBtn.disabled = true;
+            startBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+            stopBtn.disabled = false;
+            reader.classList.remove('hidden');
+
+            message.textContent = 'Starting camera...';
+            message.className = 'text-sm mt-4 text-slate-500';
+
+            const currentSession = ++scannerSessionId;
+
+            // Wait if a previous transition (e.g. stop) is still completing
+            if (scannerTransitionPromise) {
+                try {
+                    await scannerTransitionPromise;
+                } catch (_) {}
+            }
+
+            // If the user cancelled or switched tabs while waiting, abort
+            if (currentSession !== scannerSessionId) {
+                return;
+            }
+
+            let startPromiseResolve;
+            scannerTransitionPromise = new Promise(resolve => { startPromiseResolve = resolve; });
+
+            try {
+                await cleanupScannerHardware();
+
+                if (currentSession !== scannerSessionId) {
+                    return;
+                }
+
+                const scanner = new Html5Qrcode('scanner-reader');
+                scannerActiveInstance = scanner;
+
+                await scanner.start(
+                    { facingMode: 'environment' },
+                    {
+                        fps: 10,
+                        qrbox: { width: 300, height: 150 }
+                    },
+                    async (decodedText) => {
+                        if (barcodeHandlingScan) return;
+                        barcodeHandlingScan = true;
+                        try {
+                            document.getElementById('scanner-barcode-input').value = decodedText;
+                            await stopBarcodeScanner();
+                            findScannedProduct();
+                        } finally {
+                            barcodeHandlingScan = false;
+                        }
+                    },
+                    () => {}
+                );
+
+                // Check if user clicked stop or switched tabs while start() was running
+                if (currentSession !== scannerSessionId) {
+                    await cleanupScannerHardware();
+                    return;
+                }
+
+                scannerRunning = true;
+                message.textContent = 'Camera active — hold a barcode in front of the camera.';
+                message.className = 'text-sm mt-4 text-indigo-600';
+
+            } catch (error) {
+                if (currentSession === scannerSessionId) {
+                    console.error('Scanner error:', error);
+                    await cleanupScannerHardware();
+                    scannerRunning = false;
+                    resetScannerUI();
+
+                    message.textContent = 'Could not start camera: ' + (error.message || error);
+                    message.className = 'text-sm mt-4 text-rose-600';
+                }
+            } finally {
+                startPromiseResolve();
+                scannerTransitionPromise = null;
+                if (currentSession !== scannerSessionId) {
+                    resetScannerUI();
+                }
+            }
+        }
+
+        async function stopBarcodeScanner() {
+            const currentSession = ++scannerSessionId;
+
+            const startBtn = document.getElementById('scanner-start-btn');
+            const stopBtn = document.getElementById('scanner-stop-btn');
+            const message = document.getElementById('scanner-message');
+
+            resetScannerUI();
+
+            // Disable buttons during hardware teardown to prevent spam clicks
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (stopBtn) {
+                stopBtn.disabled = true;
+                stopBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (message && (
+                message.textContent.includes('Camera active') ||
+                message.textContent.includes('Starting camera')
+            )) {
+                message.textContent = '';
+                message.className = 'text-sm mt-4';
+            }
+
+            let stopPromiseResolve;
+            const prevTransition = scannerTransitionPromise;
+            scannerTransitionPromise = new Promise(resolve => { stopPromiseResolve = resolve; });
+
+            try {
+                if (prevTransition) {
+                    try {
+                        await prevTransition;
+                    } catch (_) {}
+                }
+
+                await cleanupScannerHardware();
+            } finally {
+                scannerRunning = false;
+                stopPromiseResolve();
+                scannerTransitionPromise = null;
+
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = false;
+                    stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
+                if (message && (
+                    message.textContent.includes('Camera active') ||
+                    message.textContent.includes('Starting camera')
+                )) {
+                    message.textContent = '';
+                    message.className = 'text-sm mt-4';
+                }
+            }
+        }
+
+        // Manual barcode lookup button.
+        document
+            .getElementById('scanner-lookup-btn')
+            .addEventListener(
+                'click',
+                findScannedProduct
+            );
+
+        // Enter key also performs lookup.
+        document
+            .getElementById('scanner-barcode-input')
+            .addEventListener(
+                'keydown',
+                (event) => {
+
+                    if (event.key === 'Enter') {
+                        findScannedProduct();
+                    }
+
+                }
+            );
+
+        // Camera controls.
+        document
+            .getElementById('scanner-start-btn')
+            .addEventListener(
+                'click',
+                startBarcodeScanner
+            );
+
+        document
+            .getElementById('scanner-stop-btn')
+            .addEventListener(
+                'click',
+                stopBarcodeScanner
+            );
 
         /* --- ORDERS --- */
 

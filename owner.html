@@ -139,72 +139,72 @@
             </section>
 
             <!-- COUPONS TAB -->
-<section id="pane-coupons" class="tab-pane hidden space-y-6">
-
-    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-
-        <h2 class="text-lg font-bold mb-2">
-            Manage Coupons & Discounts
-        </h2>
-
-        <p class="text-sm text-slate-500 mb-6">
-            Create and manage discount codes for your storefronts.
-        </p>
-
-        <form id="coupon-form"
-            class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            <input id="coupon-code"
-                type="text"
-                placeholder="Coupon Code"
-                maxlength="32"
-                required
-                class="border rounded-lg px-4 py-2">
-
-            <select id="coupon-storefront"
-                required
-                class="border rounded-lg px-4 py-2">
-                <option value="">Select Storefront</option>
-            </select>
-
-            <select id="coupon-type"
-                class="border rounded-lg px-4 py-2">
-                <option value="percent">Percentage (%)</option>
-                <option value="fixed">Fixed Amount ($)</option>
-            </select>
-
-            <input id="coupon-value"
-                type="number"
-                min="0.01"
-                step="0.01"
-                placeholder="Discount Value"
-                required
-                class="border rounded-lg px-4 py-2">
-
-            <button type="submit"
-                class="bg-slate-900 text-white rounded-lg px-4 py-2">
-                Create Coupon
-            </button>
-
-        </form>
-
-        <p id="coupon-message" class="text-sm mt-4"></p>
-
-    </div>
-
-    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-
-        <h2 class="font-bold mb-4">
-            Existing Coupons
-        </h2>
-
-        <div id="coupons-list" class="space-y-3">
-            No coupons loaded.
-        </div>
-
-    </div>
-
-</section>
+            <section id="pane-coupons" class="tab-pane hidden space-y-6">
+            
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            
+                    <h2 class="text-lg font-bold mb-2">
+                        Manage Coupons & Discounts
+                    </h2>
+            
+                    <p class="text-sm text-slate-500 mb-6">
+                        Create and manage discount codes for your storefronts.
+                    </p>
+            
+                    <form id="coupon-form"
+                        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+                        <input id="coupon-code"
+                            type="text"
+                            placeholder="Coupon Code"
+                            maxlength="32"
+                            required
+                            class="border rounded-lg px-4 py-2">
+            
+                        <select id="coupon-storefront"
+                            required
+                            class="border rounded-lg px-4 py-2">
+                            <option value="">Select Storefront</option>
+                        </select>
+            
+                        <select id="coupon-type"
+                            class="border rounded-lg px-4 py-2">
+                            <option value="percent">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount ($)</option>
+                        </select>
+            
+                        <input id="coupon-value"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Discount Value"
+                            required
+                            class="border rounded-lg px-4 py-2">
+            
+                        <button type="submit"
+                            class="bg-slate-900 text-white rounded-lg px-4 py-2">
+                            Create Coupon
+                        </button>
+            
+                    </form>
+            
+                    <p id="coupon-message" class="text-sm mt-4"></p>
+            
+                </div>
+            
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            
+                    <h2 class="font-bold mb-4">
+                        Existing Coupons
+                    </h2>
+            
+                    <div id="coupons-list" class="space-y-3">
+                        No coupons loaded.
+                    </div>
+            
+                </div>
+            
+            </section>
             <!-- STOREFRONTS TAB -->
             <section id="pane-storefronts" class="tab-pane hidden space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
@@ -741,6 +741,7 @@
             renderSales();
         }
 
+        
         function syncDropdowns() {
             const activeOptions = state.storefronts
                 .filter(s => s.status === 'Active')
@@ -749,14 +750,24 @@
 
             ['filter-storefront', 'worker-filter-storefront'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.innerHTML = '<option value="">All Storefronts</option>' + activeOptions;
+                if (el) el.innerHTML =
+                    '<option value="">All Storefronts</option>' + activeOptions;
             });
-
+        
             ['modal-storefront', 'worker-storefront'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = activeOptions;
             });
+        
+            // Populate coupon storefront dropdown.
+            const couponDropdown = document.getElementById('coupon-storefront');
+        
+            if (couponDropdown) {
+                couponDropdown.innerHTML =
+                    '<option value="">Select Storefront</option>' + activeOptions;
+            }
         }
+
 
         // ==========================================
         // SALES & ANALYTICS

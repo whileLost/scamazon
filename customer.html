@@ -244,6 +244,16 @@
         let cart = [];
         let trackedOrderCache = null;
 
+        function sanitizeHtml(str) {
+            if (!str && str !== 0) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         async function checkSession() {
             const { data: { session } } = await client.auth.getSession();
             if (!session) {
@@ -317,7 +327,7 @@
         function populateStorefrontDropdown() {
             const select = document.getElementById('catalog-storefront');
             select.innerHTML = `<option value="">All Storefronts</option>` + 
-                activeStorefronts.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+                activeStorefronts.map(s => `<option value="${sanitizeHtml(s.name)}">${sanitizeHtml(s.name)}</option>`).join('');
             select.value = "";
         }
 
@@ -328,7 +338,7 @@
 
             const branchItems = allListings.filter(l => {
                 const matchesBranch = !selectedBranch || l.storefront === selectedBranch;
-                const matchesSearch = l.title.toLowerCase().includes(searchTerm) || l.sku.toLowerCase().includes(searchTerm);
+                const matchesSearch = (l.title || '').toLowerCase().includes(searchTerm) || (l.sku || '').toLowerCase().includes(searchTerm);
                 return matchesBranch && matchesSearch;
             });
 
@@ -340,8 +350,10 @@
             container.innerHTML = branchItems.map(item => {
                 const isOutOfStock = item.stock <= 0;
                 const img = item.image_url 
-                    ? `<img src="${item.image_url}" class="w-full h-40 object-cover rounded-lg mb-3 border border-slate-200">`
-                    : `<div class="w-full h-40 bg-slate-100 rounded-lg mb-3 flex items-center justify-center text-slate-400 font-mono text-xs border border-slate-200">No Image</div>`;
+                    ? `<div class="w-full h-44 bg-white rounded-lg mb-3 border border-slate-200 flex items-center justify-center p-2.5 overflow-hidden">
+                        <img src="${sanitizeHtml(item.image_url)}" alt="${sanitizeHtml(item.title)}" class="max-h-full max-w-full object-contain">
+                       </div>`
+                    : `<div class="w-full h-44 bg-slate-50 rounded-lg mb-3 flex items-center justify-center text-slate-400 font-mono text-xs border border-slate-200">No Image</div>`;
 
                 return `
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -349,17 +361,17 @@
                             ${img}
                             <div class="flex justify-between items-start gap-2">
                                 <div>
-                                    <h3 class="font-bold text-slate-900 text-sm tracking-tight">${item.title}</h3>
-                                    <p class="text-xs font-mono text-slate-400">${item.sku}</p>
-                                    <span class="inline-block mt-1.5 text-[11px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">${item.storefront}</span>
+                                    <h3 class="font-bold text-slate-900 text-sm tracking-tight">${sanitizeHtml(item.title)}</h3>
+                                    <p class="text-xs font-mono text-slate-400">${sanitizeHtml(item.sku)}</p>
+                                    <span class="inline-block mt-1.5 text-[11px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">${sanitizeHtml(item.storefront)}</span>
                                 </div>
-                                <span class="text-sm font-bold text-slate-900">$${parseFloat(item.price).toFixed(2)}</span>
+                                <span class="text-sm font-bold text-slate-900">$${(parseFloat(item.price) || 0).toFixed(2)}</span>
                             </div>
                             <p class="text-xs mt-3 ${isOutOfStock ? 'text-rose-600 font-semibold' : 'text-slate-500'}">
-                                ${isOutOfStock ? 'Out of Stock' : item.stock + ' units available'}
+                                ${isOutOfStock ? 'Out of Stock' : (item.stock || 0) + ' units available'}
                             </p>
                         </div>
-                        <button onclick="addToCart('${item.id}')" ${isOutOfStock ? 'disabled' : ''} 
+                        <button onclick="addToCart('${sanitizeHtml(item.id)}')" ${isOutOfStock ? 'disabled' : ''} 
                             class="mt-4 w-full inline-flex items-center justify-center py-2 px-4 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 hover:-translate-y-0.5 shadow-sm shadow-slate-900/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed">
                             ${isOutOfStock ? 'Unavailable' : 'Add to Cart'}
                         </button>
@@ -412,13 +424,13 @@
                 return `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
                         <div>
-                            <p class="font-semibold text-slate-900">${item.title}</p>
-                            <p class="text-slate-400 font-mono">${item.sku} &bull; $${item.price} each</p>
-                            <p class="text-[10px] text-slate-500 font-medium">${item.storefront}</p>
+                            <p class="font-semibold text-slate-900">${sanitizeHtml(item.title)}</p>
+                            <p class="text-slate-400 font-mono">${sanitizeHtml(item.sku)} &bull; $${(parseFloat(item.price) || 0).toFixed(2)} each</p>
+                            <p class="text-[10px] text-slate-500 font-medium">${sanitizeHtml(item.storefront)}</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="font-mono font-bold text-slate-900">Qty: ${item.qty}</span>
-                            <button onclick="removeFromCart('${item.id}')" class="text-rose-600 hover:text-rose-800 ml-2 font-bold text-sm">&times;</button>
+                            <button onclick="removeFromCart('${sanitizeHtml(item.id)}')" class="text-rose-600 hover:text-rose-800 ml-2 font-bold text-sm">&times;</button>
                         </div>
                     </div>
                 `;

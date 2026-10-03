@@ -68,7 +68,8 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Main Content Area: space-y removed to prevent vertical position jumps across tabs -->
+        <main class="flex-1 overflow-y-auto p-6">
             <!-- LISTINGS TAB -->
             <section id="pane-listings" class="tab-pane space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -131,7 +132,7 @@
             </section>
 
             <!-- STOREFRONTS TAB -->
-            <section id="pane-storefronts" class="tab-pane hidden space-y-6">
+            <section id="pane-storefronts" class="tab-pane hidden space-y-6" hidden>
                 <div class="flex flex-col sm:flex-row justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                     <div class="flex flex-1 flex-col sm:flex-row gap-2">
                         <input id="sf-search-input" type="text" placeholder="Find location or address..." 
@@ -168,7 +169,7 @@
             </section>
 
             <!-- WORKERS TAB -->
-            <section id="pane-workers" class="tab-pane hidden space-y-6">
+            <section id="pane-workers" class="tab-pane hidden space-y-6" hidden>
                 <div class="flex flex-col sm:flex-row justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                     <div class="flex flex-1 flex-col sm:flex-row gap-2">
                         <input id="worker-search-input" type="text" placeholder="Search name or email..." 
@@ -202,7 +203,7 @@
             </section>
 
             <!-- ORDERS TAB -->
-            <section id="pane-orders" class="tab-pane hidden space-y-6">
+            <section id="pane-orders" class="tab-pane hidden space-y-6" hidden>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Orders</p>
@@ -252,8 +253,8 @@
             </section>
 
             <!-- SALES TAB -->
-            <section id="pane-sales" class="tab-pane hidden space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <section id="pane-sales" class="tab-pane hidden space-y-6" hidden>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Estimated Revenue</p>
                         <p id="stat-sales-rev" class="text-2xl font-bold tracking-tight text-emerald-600 mt-1">$0.00</p>
@@ -261,6 +262,10 @@
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Orders</p>
                         <p id="stat-sales-orders" class="text-2xl font-bold tracking-tight text-slate-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Units Sold</p>
+                        <p id="stat-sales-units" class="text-2xl font-bold tracking-tight text-indigo-600 mt-1">0</p>
                     </div>
                 </div>
 
@@ -590,9 +595,15 @@
         });
 
         function switchTab(tab) {
-            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-pane').forEach(el => {
+                el.classList.add('hidden');
+                el.setAttribute('hidden', '');
+            });
             const targetPane = document.getElementById(`pane-${tab}`);
-            if (targetPane) targetPane.classList.remove('hidden');
+            if (targetPane) {
+                targetPane.classList.remove('hidden');
+                targetPane.removeAttribute('hidden');
+            }
 
             document.querySelectorAll('#sidebar-nav .nav-item').forEach(btn => {
                 const badge = btn.querySelector('span');
@@ -726,6 +737,8 @@
 
             document.getElementById('stat-sales-rev').textContent = `$${grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('stat-sales-orders').textContent = state.orders.length;
+            const statUnits = document.getElementById('stat-sales-units');
+            if (statUnits) statUnits.textContent = totalSold;
 
             if (!summary.length) {
                 tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">No sales records available.</td></tr>';

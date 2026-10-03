@@ -171,8 +171,11 @@
         <!-- Drawer Panel: Slides In / Out from Right Edge -->
         <div id="cart-panel" class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col p-6 border-l border-slate-200 transform translate-x-full transition-transform duration-300 ease-out pointer-events-auto">
             <div class="flex justify-between items-center border-b border-slate-200 pb-4">
-                <h3 class="text-lg font-bold text-slate-900">Your Cart</h3>
-                <button onclick="toggleCartDrawer(false)" class="text-slate-400 hover:text-slate-600 text-xl leading-none">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Your Cart</h3>
+                    <p class="text-xs text-slate-500">Review and adjust items before ordering</p>
+                </div>
+                <button onclick="toggleCartDrawer(false)" class="text-slate-400 hover:text-slate-600 text-xl leading-none p-1 rounded-lg hover:bg-slate-100 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -509,6 +512,51 @@
             updateCartUI();
         }
 
+        /* --- CART QUANTITY MODIFIERS --- */
+        function changeCartQty(id, delta) {
+            const cartItem = cart.find(c => c.id === id);
+            if (!cartItem) return;
+
+            const catalogItem = allListings.find(l => l.id === id) || cartItem;
+            const maxStock = catalogItem.stock !== undefined ? catalogItem.stock : 999;
+            const newQty = cartItem.qty + delta;
+
+            if (newQty <= 0) {
+                removeFromCart(id);
+                return;
+            }
+
+            if (newQty > maxStock) {
+                alert(`Cannot add more than ${maxStock} units currently in stock.`);
+                return;
+            }
+
+            cartItem.qty = newQty;
+            updateCartUI();
+        }
+
+        function setCartQtyManual(id, rawVal) {
+            const cartItem = cart.find(c => c.id === id);
+            if (!cartItem) return;
+
+            const catalogItem = allListings.find(l => l.id === id) || cartItem;
+            const maxStock = catalogItem.stock !== undefined ? catalogItem.stock : 999;
+            let val = parseInt(rawVal, 10);
+
+            if (isNaN(val) || val <= 0) {
+                removeFromCart(id);
+                return;
+            }
+
+            if (val > maxStock) {
+                alert(`Cannot add more than ${maxStock} units currently in stock.`);
+                val = maxStock;
+            }
+
+            cartItem.qty = val;
+            updateCartUI();
+        }
+
         function updateCartUI() {
             const count = cart.reduce((sum, i) => sum + i.qty, 0);
             document.getElementById('cart-counter').textContent = count;
@@ -529,18 +577,51 @@
 
             let total = 0;
             container.innerHTML = cart.map(item => {
-                const sub = item.qty * item.price;
+                const price = parseFloat(item.price) || 0;
+                const sub = item.qty * price;
                 total += sub;
+                const maxStock = item.stock !== undefined ? item.stock : 999;
+                const isMax = item.qty >= maxStock;
+
                 return `
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-                        <div>
-                            <p class="font-semibold text-slate-900">${sanitizeHtml(item.title)}</p>
-                            <p class="text-slate-400 font-mono">${sanitizeHtml(item.sku)} &bull; $${(parseFloat(item.price) || 0).toFixed(2)} each</p>
-                            <p class="text-[10px] text-slate-500 font-medium">${sanitizeHtml(item.storefront)}</p>
+                    <div class="flex flex-col gap-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs hover:border-slate-300 transition-colors">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="font-semibold text-slate-900 truncate text-[13px] leading-snug">${sanitizeHtml(item.title)}</p>
+                                <p class="text-slate-400 font-mono text-[11px] mt-0.5">${sanitizeHtml(item.sku)} &bull; $${price.toFixed(2)} each</p>
+                                <p class="text-[10px] text-slate-500 font-medium mt-0.5">${sanitizeHtml(item.storefront)} &bull; <span class="text-slate-400">${maxStock} in stock</span></p>
+                            </div>
+                            <button onclick="removeFromCart('${sanitizeHtml(item.id)}')" class="text-slate-400 hover:text-rose-600 transition-colors p-1 -mr-1 -mt-1 rounded hover:bg-slate-200/50" title="Remove item">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono font-bold text-slate-900">Qty: ${item.qty}</span>
-                            <button onclick="removeFromCart('${sanitizeHtml(item.id)}')" class="text-rose-600 hover:text-rose-800 ml-2 font-bold text-sm">&times;</button>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-200/70">
+                            <!-- Stepper + Manual Entry Input -->
+                            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                                <button onclick="changeCartQty('${sanitizeHtml(item.id)}', -1)" class="w-6 h-6 flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded font-bold text-xs transition-colors" title="Decrease quantity">
+                                    &minus;
+                                </button>
+                                <input 
+                                    type="number" 
+                                    min="1" 
+                                    max="${maxStock}" 
+                                    value="${item.qty}" 
+                                    onchange="setCartQtyManual('${sanitizeHtml(item.id)}', this.value)" 
+                                    onkeydown="if(event.key==='Enter') this.blur();"
+                                    class="w-10 text-center font-mono font-bold text-slate-900 text-xs bg-transparent focus:outline-none focus:ring-1 focus:ring-slate-400 rounded py-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                                    title="Click to type custom quantity"
+                                >
+                                <button onclick="changeCartQty('${sanitizeHtml(item.id)}', 1)" ${isMax ? 'disabled' : ''} class="w-6 h-6 flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded font-bold text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="${isMax ? 'Max stock reached' : 'Increase quantity'}">
+                                    +
+                                </button>
+                            </div>
+
+                            <!-- Line Subtotal -->
+                            <div class="text-right">
+                                <span class="text-slate-400 text-[10px] block font-medium">Subtotal</span>
+                                <span class="font-mono font-bold text-slate-900 text-sm">$${sub.toFixed(2)}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -566,11 +647,7 @@
             const total = cart.reduce((sum, i) => sum + (i.qty * i.price), 0).toFixed(2);
 
             try {
-                for (const item of cart) {
-                    const newStock = Math.max(0, item.stock - item.qty);
-                    await client.from('listings').update({ stock: newStock }).eq('id', item.id);
-                }
-
+                // 1. Insert order first
                 const { error: orderErr } = await client.from('orders').insert([{
                     order_number: orderNum,
                     storefront: selectedBranch,
@@ -579,6 +656,12 @@
                 }]);
 
                 if (orderErr) throw orderErr;
+
+                // 2. Decrement stock after order is saved
+                for (const item of cart) {
+                    const newStock = Math.max(0, item.stock - item.qty);
+                    await client.from('listings').update({ stock: newStock }).eq('id', item.id);
+                }
 
                 document.getElementById('confirmation-message').textContent = 
                     `${orderNum} confirmed. Held for 48 hours. Total: $${total}.`;

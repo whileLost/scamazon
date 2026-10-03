@@ -175,14 +175,14 @@
 
                         <button
                             id="scanner-start-btn"
-                            class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700"
+                            class="w-full bg-indigo-600 text-white font-semibold rounded-lg px-4 py-2 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             Scan Barcode
                         </button>
 
                         <button
                             id="scanner-stop-btn"
-                            class="hidden w-full bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-2 hover:bg-slate-300"
+                            class="hidden w-full bg-slate-200 text-slate-800 font-semibold rounded-lg px-4 py-2 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             Stop Scanner
                         </button>
@@ -549,9 +549,8 @@
         });
 
         function switchTab(tab) {
-            
-            // Stop the camera if the worker leaves the scanner tab.
-            if (tab !== 'scanner' && barcodeScannerRunning) {
+            // Stop the camera if the worker leaves the scanner tab
+            if (tab !== 'scanner') {
                 stopBarcodeScanner();
             }
             
@@ -790,36 +789,82 @@
 
         /* --- BARCODE SCANNER --- */
 
-        let barcodeScanner = null;
-        let barcodeScannerRunning = false;
+        let scannerActiveInstance = null;
+        let scannerRunning = false;
         let barcodeHandlingScan = false;
+        let scannerSessionId = 0;
+        let scannerTransitionPromise = null;
+
+        function resetScannerUI() {
+            const reader = document.getElementById('scanner-reader');
+            const startButton = document.getElementById('scanner-start-btn');
+            const stopButton = document.getElementById('scanner-stop-btn');
+
+            if (reader) reader.classList.add('hidden');
+            if (stopButton) {
+                stopButton.classList.add('hidden');
+                stopButton.disabled = false;
+                stopButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (startButton) {
+                startButton.classList.remove('hidden');
+                startButton.disabled = false;
+                startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        async function cleanupScannerHardware() {
+            if (scannerActiveInstance) {
+                const inst = scannerActiveInstance;
+                scannerActiveInstance = null;
+                try {
+                    const state = typeof inst.getState === 'function' ? inst.getState() : null;
+                    if (state === 2 || state === 3 || inst.isScanning) {
+                        await inst.stop();
+                    }
+                } catch (err) {
+                    console.warn('Gracefully handled scanner stop error:', err);
+                }
+                try {
+                    await inst.clear();
+                } catch (_) {}
+            }
+
+            // Stop all hardware media stream tracks explicitly on all video elements inside #scanner-reader
+            const reader = document.getElementById('scanner-reader');
+            if (reader) {
+                const videos = reader.querySelectorAll('video');
+                videos.forEach(video => {
+                    if (video.srcObject && typeof video.srcObject.getTracks === 'function') {
+                        video.srcObject.getTracks().forEach(track => {
+                            try {
+                                track.stop();
+                            } catch (_) {}
+                        });
+                    }
+                    video.srcObject = null;
+                });
+                reader.innerHTML = '';
+            }
+        }
 
         // Looks for the scanned SKU inside the listings
         // already loaded for the logged-in worker's storefront.
         function findScannedProduct() {
-
             const barcode = document
                 .getElementById('scanner-barcode-input')
                 .value
                 .trim();
 
-            const message =
-                document.getElementById('scanner-message');
-
-            const result =
-                document.getElementById('scanner-result');
+            const message = document.getElementById('scanner-message');
+            const result = document.getElementById('scanner-result');
 
             result.classList.add('hidden');
             message.textContent = '';
 
             if (!barcode) {
-
-                message.textContent =
-                    'Enter or scan a barcode first.';
-
-                message.className =
-                    'text-sm mt-4 text-amber-600';
-
+                message.textContent = 'Enter or scan a barcode first.';
+                message.className = 'text-sm mt-4 text-amber-600';
                 return;
             }
 
@@ -828,13 +873,8 @@
             );
 
             if (!item) {
-
-                message.textContent =
-                    `No product with barcode ${barcode} was found in ${currentWorker.storefront}.`;
-
-                message.className =
-                    'text-sm mt-4 text-rose-600';
-
+                message.textContent = `No product with barcode ${barcode} was found in ${currentWorker.storefront}.`;
+                message.className = 'text-sm mt-4 text-rose-600';
                 return;
             }
 
@@ -853,184 +893,172 @@
                 if (fallbackEl) fallbackEl.classList.remove('hidden');
             }
 
-            document.getElementById(
-                'scanner-product-title'
-            ).textContent = item.title || 'Unnamed Product';
-
-            document.getElementById(
-                'scanner-product-sku'
-            ).textContent = item.sku || '-';
-
-            document.getElementById(
-                'scanner-product-price'
-            ).textContent =
-                (parseFloat(item.price) || 0).toFixed(2);
-
-            document.getElementById(
-                'scanner-product-stock'
-            ).textContent = item.stock ?? 0;
-
-            document.getElementById(
-                'scanner-product-storefront'
-            ).textContent = item.storefront || '-';
+            document.getElementById('scanner-product-title').textContent = item.title || 'Unnamed Product';
+            document.getElementById('scanner-product-sku').textContent = item.sku || '-';
+            document.getElementById('scanner-product-price').textContent = (parseFloat(item.price) || 0).toFixed(2);
+            document.getElementById('scanner-product-stock').textContent = item.stock ?? 0;
+            document.getElementById('scanner-product-storefront').textContent = item.storefront || '-';
 
             result.classList.remove('hidden');
-
             message.textContent = 'Product found.';
-
-            message.className =
-                'text-sm mt-4 text-emerald-600';
+            message.className = 'text-sm mt-4 text-emerald-600';
         }
 
         async function startBarcodeScanner() {
+            if (scannerRunning) return;
 
-            const reader =
-                document.getElementById('scanner-reader');
+            const startBtn = document.getElementById('scanner-start-btn');
+            const stopBtn = document.getElementById('scanner-stop-btn');
+            const reader = document.getElementById('scanner-reader');
+            const message = document.getElementById('scanner-message');
 
-            const message =
-                document.getElementById('scanner-message');
+            // Disable start button immediately and switch button visibility
+            startBtn.disabled = true;
+            startBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+            stopBtn.disabled = false;
+            reader.classList.remove('hidden');
 
-            const startButton =
-                document.getElementById('scanner-start-btn');
+            message.textContent = 'Starting camera...';
+            message.className = 'text-sm mt-4 text-slate-500';
 
-            const stopButton =
-                document.getElementById('scanner-stop-btn');
+            const currentSession = ++scannerSessionId;
 
-            if (barcodeScannerRunning) {
+            // Wait if a previous transition (e.g. stop) is still completing
+            if (scannerTransitionPromise) {
+                try {
+                    await scannerTransitionPromise;
+                } catch (_) {}
+            }
+
+            // If the user cancelled or switched tabs while waiting, abort
+            if (currentSession !== scannerSessionId) {
                 return;
             }
 
-            reader.classList.remove('hidden');
-            startButton.classList.add('hidden');
-            stopButton.classList.remove('hidden');
-
-            message.textContent =
-                'Starting camera...';
-
-            message.className =
-                'text-sm mt-4 text-slate-500';
+            let startPromiseResolve;
+            scannerTransitionPromise = new Promise(resolve => { startPromiseResolve = resolve; });
 
             try {
+                await cleanupScannerHardware();
 
-                if (!barcodeScanner) {
-                    barcodeScanner =
-                        new Html5Qrcode('scanner-reader');
+                if (currentSession !== scannerSessionId) {
+                    return;
                 }
 
-                barcodeScannerRunning = true;
+                const scanner = new Html5Qrcode('scanner-reader');
+                scannerActiveInstance = scanner;
 
-                await barcodeScanner.start(
-
-                    {
-                        facingMode: 'environment'
-                    },
-
+                await scanner.start(
+                    { facingMode: 'environment' },
                     {
                         fps: 10,
-
-                        qrbox: {
-                            width: 300,
-                            height: 150
-                        }
+                        qrbox: { width: 300, height: 150 }
                     },
-
                     async (decodedText) => {
-
-                        if (barcodeHandlingScan) {
-                            return;
-                        }
-
+                        if (barcodeHandlingScan) return;
                         barcodeHandlingScan = true;
-
                         try {
-
-                            // Put barcode into the input box.
-                            document
-                                .getElementById('scanner-barcode-input')
-                                .value = decodedText;
-
-                            // Stop camera after successful scan.
+                            document.getElementById('scanner-barcode-input').value = decodedText;
                             await stopBarcodeScanner();
-
-                            // Automatically look up the item.
                             findScannedProduct();
-
                         } finally {
-
                             barcodeHandlingScan = false;
-
                         }
                     },
-
-                    () => {
-                        // Keep scanning until a barcode is detected.
-                    }
-
+                    () => {}
                 );
 
-                message.textContent =
-                    'Camera active — hold a barcode in front of the camera.';
+                // Check if user clicked stop or switched tabs while start() was running
+                if (currentSession !== scannerSessionId) {
+                    await cleanupScannerHardware();
+                    return;
+                }
 
-                message.className =
-                    'text-sm mt-4 text-indigo-600';
+                scannerRunning = true;
+                message.textContent = 'Camera active — hold a barcode in front of the camera.';
+                message.className = 'text-sm mt-4 text-indigo-600';
 
             } catch (error) {
+                if (currentSession === scannerSessionId) {
+                    console.error('Scanner error:', error);
+                    await cleanupScannerHardware();
+                    scannerRunning = false;
+                    resetScannerUI();
 
-                barcodeScannerRunning = false;
-
-                console.error(
-                    'Scanner error:',
-                    error
-                );
-
-                reader.classList.add('hidden');
-                startButton.classList.remove('hidden');
-                stopButton.classList.add('hidden');
-
-                message.textContent =
-                    'Could not start camera: ' + error;
-
-                message.className =
-                    'text-sm mt-4 text-rose-600';
+                    message.textContent = 'Could not start camera: ' + (error.message || error);
+                    message.className = 'text-sm mt-4 text-rose-600';
+                }
+            } finally {
+                startPromiseResolve();
+                scannerTransitionPromise = null;
+                if (currentSession !== scannerSessionId) {
+                    resetScannerUI();
+                }
             }
         }
 
         async function stopBarcodeScanner() {
+            const currentSession = ++scannerSessionId;
 
-            const reader =
-                document.getElementById('scanner-reader');
+            const startBtn = document.getElementById('scanner-start-btn');
+            const stopBtn = document.getElementById('scanner-stop-btn');
+            const message = document.getElementById('scanner-message');
 
-            const startButton =
-                document.getElementById('scanner-start-btn');
+            resetScannerUI();
 
-            const stopButton =
-                document.getElementById('scanner-stop-btn');
-
-            if (
-                barcodeScanner &&
-                barcodeScannerRunning
-            ) {
-
-                try {
-
-                    await barcodeScanner.stop();
-
-                } catch (error) {
-
-                    console.error(
-                        'Could not stop scanner:',
-                        error
-                    );
-
-                }
-
+            // Disable buttons during hardware teardown to prevent spam clicks
+            if (startBtn) {
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (stopBtn) {
+                stopBtn.disabled = true;
+                stopBtn.classList.add('opacity-50', 'cursor-not-allowed');
             }
 
-            barcodeScannerRunning = false;
+            if (message && (
+                message.textContent.includes('Camera active') ||
+                message.textContent.includes('Starting camera')
+            )) {
+                message.textContent = '';
+                message.className = 'text-sm mt-4';
+            }
 
-            reader.classList.add('hidden');
-            startButton.classList.remove('hidden');
-            stopButton.classList.add('hidden');
+            let stopPromiseResolve;
+            const prevTransition = scannerTransitionPromise;
+            scannerTransitionPromise = new Promise(resolve => { stopPromiseResolve = resolve; });
+
+            try {
+                if (prevTransition) {
+                    try {
+                        await prevTransition;
+                    } catch (_) {}
+                }
+
+                await cleanupScannerHardware();
+            } finally {
+                scannerRunning = false;
+                stopPromiseResolve();
+                scannerTransitionPromise = null;
+
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (stopBtn) {
+                    stopBtn.disabled = false;
+                    stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
+                if (message && (
+                    message.textContent.includes('Camera active') ||
+                    message.textContent.includes('Starting camera')
+                )) {
+                    message.textContent = '';
+                    message.className = 'text-sm mt-4';
+                }
+            }
         }
 
         // Manual barcode lookup button.

@@ -72,7 +72,7 @@
         <main class="flex-1 overflow-y-auto p-6">
             <!-- LISTINGS TAB -->
             <section id="pane-listings" class="tab-pane space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Listings</p>
                         <p id="stat-total" class="text-2xl font-bold tracking-tight text-slate-900 mt-1">0</p>
@@ -80,6 +80,10 @@
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Low Stock (&lt; 10)</p>
                         <p id="stat-low" class="text-2xl font-bold tracking-tight text-amber-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Empty Stock</p>
+                        <p id="stat-empty" class="text-2xl font-bold tracking-tight text-red-600 mt-1">0</p>
                     </div>
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Units</p>
@@ -842,6 +846,7 @@
 
             document.getElementById('stat-total').textContent = state.listings.length;
             document.getElementById('stat-low').textContent = state.listings.filter(i => i.stock > 0 && i.stock < 10).length;
+            document.getElementById('stat-empty').textContent = state.listings.filter(i => i.stock == 0).length;
             document.getElementById('stat-units').textContent = state.listings.reduce((acc, curr) => acc + (parseInt(curr.stock, 10) || 0), 0);
             document.getElementById('badge-listings').textContent = state.listings.length;
 

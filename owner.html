@@ -857,7 +857,7 @@
 
             tbody.innerHTML = itemsList.map(item => {
                 let badge = `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium rounded-md">${item.stock}</span>`;
-                if (item.stock === 0) badge = '<span class="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium rounded-md">Out of Stock</span>';
+                if (item.stock === 0) badge = '<span class="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium rounded-md">Out</span>';
                 else if (item.stock < 10) badge = `<span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium rounded-md">Low (${item.stock})</span>`;
 
                 const img = item.image_url 

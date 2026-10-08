@@ -99,6 +99,22 @@
 
         let isSignUp = false;
 
+        // check if signup instead
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            isSignUp = urlParams.get('mode') === 'signup';
+
+            if (isSignUp)
+            {
+                openSignUp();
+            }
+            else
+            {
+                openLogIn();
+            }
+
+        });
+
         const authForm = document.getElementById('auth-form');
         const nameInput = document.getElementById('name');
         const nameContainer = document.getElementById('name-container');
@@ -118,19 +134,9 @@
             successDiv.classList.add('hidden');
 
             if (isSignUp) {
-                nameContainer.classList.remove('hidden');
-                formTitle.textContent = 'Create Account';
-                formSubtitle.textContent = 'Register a new customer account';
-                submitBtn.textContent = 'Sign Up';
-                toggleText.textContent = 'Already have an account?';
-                toggleBtn.textContent = 'Sign In';
+                openSignUp();
             } else {
-                nameContainer.classList.add('hidden');
-                formTitle.textContent = 'Sign In';
-                formSubtitle.textContent = 'Access your dashboard';
-                submitBtn.textContent = 'Sign In';
-                toggleText.textContent = "Don't have an account?";
-                toggleBtn.textContent = 'Sign Up';
+                openLogIn();
             }
         });
 
@@ -186,6 +192,26 @@
                 submitBtn.textContent = isSignUp ? 'Sign Up' : 'Sign In';
             }
         });
+
+        function openSignUp()
+        {
+            nameContainer.classList.remove('hidden');
+            formTitle.textContent = 'Create Account';
+            formSubtitle.textContent = 'Register a new customer account';
+            submitBtn.textContent = 'Sign Up';
+            toggleText.textContent = 'Already have an account?';
+            toggleBtn.textContent = 'Sign In';
+        }
+
+        function openLogIn()
+        {
+            nameContainer.classList.add('hidden');
+            formTitle.textContent = 'Sign In';
+            formSubtitle.textContent = 'Access your dashboard';
+            submitBtn.textContent = 'Sign In';
+            toggleText.textContent = "Don't have an account?";
+            toggleBtn.textContent = 'Sign Up';
+        }
     </script>
 </body>
 </html>

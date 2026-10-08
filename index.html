@@ -49,7 +49,7 @@
             </a>
 
             <!-- right side nav -->
-            <div class="flex items-center space-x-12">
+            <div id="navbar" class="flex items-center space-x-12">
                 <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
                     Home
                 </a>
@@ -260,6 +260,14 @@
                 if (error) throw error;
 
                 if (session?.user) console.log('Logged in', session.user);
+
+                if (session) {
+                    const userEmail = session.user.email;
+                    const displayName = userEmail.split('@')[0];
+                    const navbar = document.getElementById('navbar')
+
+                    console.log(session);
+                }
             }
             catch (authError)
             {

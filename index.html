@@ -14,6 +14,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -251,32 +252,37 @@
     <script type="module">
         import { client } from './supaBase.js'
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await client.auth.getSession();
-
-            if (session)
+        async function initialize()
+        {
+            try
             {
-                console.log('Logged in', session.user);       
+                const { data: { session }, error } = await client.auth.getSession();
+                if (error) throw error;
+
+                if (session?.user) console.log('Logged in', session.user);
             }
-        });
+            catch (authError)
+            {
+                console.error('Authentication failed: ', authError.message || authError);
+            }
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        try
+        {
             const scrollerContent = document.getElementById('scroller-content');
-
             if (scrollerContent)
             {
-                const duplicatedContent = scrollerContent.innerHTML;
+                const template = scrollerContent.innerHTML;
 
-                scrollerContent.insertAdjacentHTML('beforeend', duplicatedContent);
-
-                // scrollerContent.addEventListener('mouseover', () => {
-                //     scrollerContent.style.animationPlayState = 'paused';
-                // });
-                // scrollerContent.addEventListener('mouseout', () => {
-                //     scrollerContent.style.animationPlayState = 'running';
-                // });
+                scrollerContent.insertAdjacentHTML('beforeend', template);
             }
-        });
+        }
+        catch (domError)
+        {
+            console.error('Animation failed', domError.message || domError);
+        }
+
+        initialize();
     </script>
 </body>
 </html>

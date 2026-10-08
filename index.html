@@ -248,7 +248,18 @@
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        import { client } from './supaBase.js'
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await client.auth.getSession();
+
+            if (session)
+            {
+                console.log('Logged in', session.user);       
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const scrollerContent = document.getElementById('scroller-content');
 

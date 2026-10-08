@@ -92,12 +92,22 @@
         </div>
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtcqblyyprofjocksdij.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75';
-        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    <script type="module">
+        import { client } from './supaBase.js'
         let isSignUp = false;
+        
+        const authForm = document.getElementById('auth-form');
+        const nameInput = document.getElementById('name');
+        const nameContainer = document.getElementById('name-container');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const toggleText = document.getElementById('toggle-text');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const errorDiv = document.getElementById('error-msg');
+        const successDiv = document.getElementById('success-msg');
 
         // check if signup instead
         document.addEventListener('DOMContentLoaded', () => {
@@ -114,19 +124,6 @@
             }
 
         });
-
-        const authForm = document.getElementById('auth-form');
-        const nameInput = document.getElementById('name');
-        const nameContainer = document.getElementById('name-container');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const submitBtn = document.getElementById('submit-btn');
-        const toggleBtn = document.getElementById('toggle-btn');
-        const toggleText = document.getElementById('toggle-text');
-        const formTitle = document.getElementById('form-title');
-        const formSubtitle = document.getElementById('form-subtitle');
-        const errorDiv = document.getElementById('error-msg');
-        const successDiv = document.getElementById('success-msg');
 
         toggleBtn.addEventListener('click', () => {
             isSignUp = !isSignUp;
@@ -165,8 +162,12 @@
                     successDiv.classList.remove('hidden');
                     toggleBtn.click();
                 } else {
-                    const { data, error } = await client.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
+                    const { data: authData, error: authError } = await client.auth.signInWithPassword({
+                        email,
+                        password,
+                    });
+
+                    if (authError) throw authError;
 
                     const { data: userRecord, error: userErr } = await client
                         .from('users')

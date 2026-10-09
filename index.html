@@ -351,7 +351,7 @@
                     <a href="owner.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
                         Dashboard
                     </a>
-                    <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
                         Sign Out
                     </a>
                 `;
@@ -365,7 +365,7 @@
                     <a href="customer.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
                         Dashboard
                     </a>
-                    <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
                         Sign Out
                     </a>
                 `;
@@ -379,7 +379,7 @@
                     <a href="worker.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
                         Dashboard
                     </a>
-                    <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
                         Sign Out
                     </a>
                 `;
@@ -393,7 +393,7 @@
                     <a href="storefront.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
                         Dashboard
                     </a>
-                    <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
                         Sign Out
                     </a>
                 `;
@@ -402,12 +402,18 @@
 
         document.addEventListener('click', async (event) => {
             const { client } = await import('./supaBase.js');
-
-            if (event.target.matches("#logout-btn"))
-            {   
-                console.log('touched')
+            const logout = event.target.closest("#logout-btn")
+            
+            try
+            {
+                logout.disabled = true;
                 await client.auth.signOut();
-                window.location.reload();
+                window.location.reload()
+            }
+            catch (err)
+            {
+                console.log('Error failed: ', err);
+                logout.disabled = false;
             }
         });
 

@@ -490,6 +490,10 @@
     </div>
 
     <script>
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Uncaught Async Error:', event.reason);
+        });
+
         const client = window.supabase.createClient(
             'https://wtcqblyyprofjocksdij.supabase.co',
             'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75'

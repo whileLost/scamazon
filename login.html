@@ -92,13 +92,14 @@
         </div>
     </footer>
 
-    <script>
-        const SUPABASE_URL = 'https://wtcqblyyprofjocksdij.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75';
-        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script type="module">
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Uncaught Async Error:', event.reason);
+        });
 
+        import { client } from './supaBase.js'
         let isSignUp = false;
-
+        
         const authForm = document.getElementById('auth-form');
         const nameInput = document.getElementById('name');
         const nameContainer = document.getElementById('name-container');
@@ -112,25 +113,31 @@
         const errorDiv = document.getElementById('error-msg');
         const successDiv = document.getElementById('success-msg');
 
+        // check if signup instead
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            isSignUp = urlParams.get('mode') === 'signup';
+
+            if (isSignUp)
+            {
+                openSignUp();
+            }
+            else
+            {
+                openLogIn();
+            }
+
+        });
+
         toggleBtn.addEventListener('click', () => {
             isSignUp = !isSignUp;
             errorDiv.classList.add('hidden');
             successDiv.classList.add('hidden');
 
             if (isSignUp) {
-                nameContainer.classList.remove('hidden');
-                formTitle.textContent = 'Create Account';
-                formSubtitle.textContent = 'Register a new customer account';
-                submitBtn.textContent = 'Sign Up';
-                toggleText.textContent = 'Already have an account?';
-                toggleBtn.textContent = 'Sign In';
+                openSignUp();
             } else {
-                nameContainer.classList.add('hidden');
-                formTitle.textContent = 'Sign In';
-                formSubtitle.textContent = 'Access your dashboard';
-                submitBtn.textContent = 'Sign In';
-                toggleText.textContent = "Don't have an account?";
-                toggleBtn.textContent = 'Sign Up';
+                openLogIn();
             }
         });
 
@@ -159,8 +166,12 @@
                     successDiv.classList.remove('hidden');
                     toggleBtn.click();
                 } else {
-                    const { data, error } = await client.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
+                    const { data: authData, error: authError } = await client.auth.signInWithPassword({
+                        email,
+                        password,
+                    });
+
+                    if (authError) throw authError;
 
                     const { data: userRecord, error: userErr } = await client
                         .from('users')
@@ -170,7 +181,8 @@
 
                     if (userErr || !userRecord) {
                         throw new Error('User record could not be retrieved.');
-                    }
+                        console.log(userErr);
+                    }   
 
                     if (userRecord.role === 'storefront_owner') {
                         window.location.href = 'storefront.html';
@@ -186,6 +198,26 @@
                 submitBtn.textContent = isSignUp ? 'Sign Up' : 'Sign In';
             }
         });
+
+        function openSignUp()
+        {
+            nameContainer.classList.remove('hidden');
+            formTitle.textContent = 'Create Account';
+            formSubtitle.textContent = 'Register a new customer account';
+            submitBtn.textContent = 'Sign Up';
+            toggleText.textContent = 'Already have an account?';
+            toggleBtn.textContent = 'Sign In';
+        }
+
+        function openLogIn()
+        {
+            nameContainer.classList.add('hidden');
+            formTitle.textContent = 'Sign In';
+            formSubtitle.textContent = 'Access your dashboard';
+            submitBtn.textContent = 'Sign In';
+            toggleText.textContent = "Don't have an account?";
+            toggleBtn.textContent = 'Sign Up';
+        }
     </script>
 </body>
 </html>

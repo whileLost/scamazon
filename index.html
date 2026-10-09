@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Scamazon - Automate inventory deductions, generate packing slips, and manage storefronts efficiently with our panel.">
     <title>Scamazon</title>
+    <link rel="icon" type="image/jpg" href="/img/scamazon.jpg">
     
     <!-- Preconnect to Google Fonts for performance optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +14,7 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -41,12 +43,29 @@
     <!-- Navigation -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <nav class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center" aria-label="Main Navigation">
+            <!-- logo -->
             <a href="/" class="text-xl font-bold tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
                 Scamazon<span class="text-indigo-600">.</span>
             </a>
-            <a href="login.html" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
-                Log In
-            </a>
+
+            <!-- right side nav -->
+            <div id="navbar" class="flex items-center space-x-12">
+                <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Home
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Pricing
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Meet the Team
+                </a>
+                <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Log In
+                </a>
+                <a href="login.html?mode=signup" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    Sign Up
+                </a>
+            </div>
         </nav>
     </header>
 
@@ -231,23 +250,174 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scrollerContent = document.getElementById('scroller-content');
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Uncaught Async Error:', event.reason);
+        });
 
+        async function initialize()
+        {
+            const { client } = await import('./supaBase.js');
+
+            try
+            {
+                const navbar = document.getElementById('navbar');
+                const { data: { session }, error } = await client.auth.getSession();
+                if (error) throw error;
+
+                // not logged in
+                if (!session) 
+                {
+                    renderGuestNav(navbar);
+                    return;
+                }
+
+                console.log('Logged in', session.user);
+
+                const email = session.user.email;
+
+                try 
+                {
+                    const { data: userRecord, error: userErr } = await client
+                        .from('users')
+                        .select('role')
+                        .eq('email', email)
+                        .single();
+
+                    if (userErr || !userRecord)
+                    {
+                        console.error('Error fetching role:', userErr);
+                        renderGuestNav(navbar);
+                        return;
+                    }
+
+                    renderRoleNav(navbar, userRecord.role);
+                } 
+                catch (fetchErr)
+                {
+                    console.error('Failed to load user state:', fetchErr);
+                }
+
+            }
+            catch (authError)
+            {
+                console.error('Authentication failed: ', authError.message || authError);
+            }
+        }
+
+        try
+        {
+            const scrollerContent = document.getElementById('scroller-content');
             if (scrollerContent)
             {
-                const duplicatedContent = scrollerContent.innerHTML;
+                const template = scrollerContent.innerHTML;
 
-                scrollerContent.insertAdjacentHTML('beforeend', duplicatedContent);
+                scrollerContent.insertAdjacentHTML('beforeend', template);
+            }
+        }
+        catch (domError)
+        {
+            console.error('Animation failed', domError.message || domError);
+        }
 
-                // scrollerContent.addEventListener('mouseover', () => {
-                //     scrollerContent.style.animationPlayState = 'paused';
-                // });
-                // scrollerContent.addEventListener('mouseout', () => {
-                //     scrollerContent.style.animationPlayState = 'running';
-                // });
+        function renderGuestNav(navbar)
+        {
+            navbar.innerHTML = `
+                <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Home
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Pricing
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Meet the Team
+                </a>
+                <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Log In
+                </a>
+                <a href="login.html?mode=signup" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    Sign Up
+                </a>
+            `;
+        }
+
+        function renderRoleNav(navbar, role)
+        {
+            if (role == 'owner')
+            {
+                navbar.innerHTML = `
+                    <a class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">
+                        ${role}
+                    </a>
+                    <a href="owner.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Dashboard
+                    </a>
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                        Sign Out
+                    </a>
+                `;
+            }
+            else if (role == 'customer') 
+            {
+                navbar.innerHTML = `
+                    <a class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">
+                        ${role}
+                    </a>
+                    <a href="customer.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Dashboard
+                    </a>
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                        Sign Out
+                    </a>
+                `;
+            }
+            else if (role == 'worker')
+            {
+                navbar.innerHTML = `
+                    <a class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">
+                        ${role}
+                    </a>
+                    <a href="worker.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Dashboard
+                    </a>
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                        Sign Out
+                    </a>
+                `;
+            }
+            else
+            {
+                navbar.innerHTML = `
+                    <a class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">
+                        ${role}
+                    </a>
+                    <a href="storefront.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Dashboard
+                    </a>
+                    <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                        Sign Out
+                    </a>
+                `;
+            }
+        }
+
+        document.addEventListener('click', async (event) => {
+            const { client } = await import('./supaBase.js');
+            const logout = event.target.closest("#logout-btn")
+            
+            try
+            {
+                logout.disabled = true;
+                await client.auth.signOut();
+                window.location.reload()
+            }
+            catch (err)
+            {
+                console.log('Error failed: ', err);
+                logout.disabled = false;
             }
         });
+
+        initialize();
     </script>
 </body>
 </html>

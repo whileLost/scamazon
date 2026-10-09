@@ -255,10 +255,6 @@
 
     <!-- ================= CLIENT SCRIPTS ================= -->
     <script>
-        const SUPABASE_URL = 'https://wtcqblyyprofjocksdij.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75';
-        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let activeStorefronts = [];
         let allListings = [];
         let cart = [];
@@ -354,6 +350,7 @@
         });
 
         async function checkSession() {
+            const { client } = await import('./supaBase.js');
             const { data: { session } } = await client.auth.getSession();
             if (!session) {
                 window.location.href = 'login.html';
@@ -421,11 +418,13 @@
 
         // ================= LISTINGS =================
         async function fetchStorefronts() {
+            const { client } = await import('./supaBase.js');
             const { data } = await client.from('storefronts').select('*').eq('status', 'Active');
             activeStorefronts = data || [];
         }
 
         async function fetchListings() {
+            const { client } = await import('./supaBase.js');
             const { data } = await client.from('listings').select('*');
             allListings = data || [];
             const badge = document.getElementById('badge-listings');
@@ -637,6 +636,7 @@
         }
 
         async function placeOrder() {
+            const { client } = await import('./supaBase.js');
             const orderBtn = document.getElementById('order-btn');
             orderBtn.disabled = true;
             orderBtn.textContent = 'Processing Order...';
@@ -686,6 +686,7 @@
 
         // ================= TRACKING & INVOICES =================
         async function trackOrder() {
+            const { client } = await import('./supaBase.js');
             const query = document.getElementById('tracking-input').value.trim();
             if (!query) return;
 
@@ -754,6 +755,7 @@
         document.getElementById('catalog-search').addEventListener('input', renderCatalog);
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             window.location.href = 'login.html';
         });

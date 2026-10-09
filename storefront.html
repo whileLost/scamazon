@@ -442,10 +442,9 @@
     </div>
 
     <script>
-        const client = window.supabase.createClient(
-            'https://wtcqblyyprofjocksdij.supabase.co',
-            'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75'
-        );
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Uncaught Async Error:', event.reason);
+        });
 
         let branchStorefront = null;
         let currentManager = null;
@@ -542,6 +541,8 @@
         }
 
         async function init() {
+            const { client } = await import('./supaBase.js');
+
             try {
                 const { data: { session }, error: sessionErr } = await client.auth.getSession();
                 if (sessionErr || !session) {
@@ -586,6 +587,7 @@
         }
 
         async function loadAll() {
+            const { client } = await import('./supaBase.js');
             if (!branchStorefront) return;
 
             const [listRes, workRes, ordRes] = await Promise.all([
@@ -718,6 +720,7 @@
 
         function removeListing(id) {
             askDelete('Delete Listing', `Delete this listing? It won't come back.`, async () => {
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('listings').delete().eq('id', id).eq('storefront', branchStorefront);
                 if (error) throw error;
                 state.listings = state.listings.filter(x => x.id !== id);
@@ -726,6 +729,7 @@
         }
 
         document.getElementById('listing-form').addEventListener('submit', async (e) => {
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const btn = document.getElementById('modal-submit-btn');
             const err = document.getElementById('listingError');
@@ -800,6 +804,7 @@
 
         function removeWorker(id) {
             askDelete('Revoke Access', `Remove this worker's access from ${branchStorefront}?`, async () => {
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('users').delete().eq('id', id).eq('storefront', branchStorefront);
                 if (error) throw error;
                 state.workers = state.workers.filter(x => x.id !== id);
@@ -826,6 +831,7 @@
         });
 
         document.getElementById('confirm-email-form').addEventListener('submit', async (e) => {
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             if (!pendingWorker) return;
             const input = document.getElementById('confirm-email-input').value.trim();
@@ -1001,6 +1007,7 @@
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             window.location.replace('login.html');
         });

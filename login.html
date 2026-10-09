@@ -177,7 +177,8 @@
 
                     if (userErr || !userRecord) {
                         throw new Error('User record could not be retrieved.');
-                    }
+                        console.log(userErr);
+                    }   
 
                     if (userRecord.role === 'storefront_owner') {
                         window.location.href = 'storefront.html';

@@ -7,7 +7,8 @@ export function getCookie(name)
 
 export function setCookie(name, value, maxAge)
 {
-    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+    const isSecure = window.location.protocol === 'https:' ? 'Secure;' : '';
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax; ${isSecure}`;
 }
 
 export function deleteCookie(name)

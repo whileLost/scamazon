@@ -249,11 +249,11 @@
         </div>
     </footer>
 
-    <script type="module">
-        import { client } from './supaBase.js'
-
+    <script>
         async function initialize()
         {
+            const { client } = await import('./supaBase.js');
+
             try
             {
                 const navbar = document.getElementById('navbar');
@@ -338,23 +338,30 @@
 
         function renderRoleNav(navbar, role)
         {
-            navbar.innerHTML = `
-                <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
-                    Welcome, ${role}!
-                </a>
-                <a href="owner.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
-                    Dashboard
-                </a>
-                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
-                    Meet the Team
-                </a>
-                <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
-                    Log In
-                </a>
-                <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
-                    Sign Out
-                </a>
-            `;
+            if (role == 'owner')
+            {
+                navbar.innerHTML = `
+                    <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Welcome, ${role}!
+                    </a>
+                    <a href="owner.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Dashboard
+                    </a>
+                    <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Meet the Team
+                    </a>
+                    <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                        Log In
+                    </a>
+                    <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                        Sign Out
+                    </a>
+                `;
+            }
+            else if (role == 'customer') 
+            {
+                navbar.innerHTML = ``;
+            }
         }
 
         document.addEventListener('click', async (event) => {

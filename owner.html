@@ -534,11 +534,6 @@
     </div>
 
     <script>
-        const client = window.supabase.createClient(
-            'https://wtcqblyyprofjocksdij.supabase.co',
-            'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75'
-        );
-
         const state = {
             listings: [],
             storefronts: [],
@@ -633,6 +628,8 @@
         }
 
         async function init() {
+            const { client } = await import('./supaBase.js');
+
             try {
                 const { data: { session }, error: sessionErr } = await client.auth.getSession();
                 if (sessionErr || !session) {
@@ -656,10 +653,13 @@
                 await loadAll();
             } catch (err) {
                 window.location.replace('login.html');
+                console.log(err);
             }
         }
 
         async function loadAll() {
+            const { client } = await import('./supaBase.js');
+
             const [sfRes, listRes, workRes, ordRes] = await Promise.all([
                 client.from('storefronts').select('*').order('created_at', { ascending: false }),
                 client.from('listings').select('*').order('created_at', { ascending: false }),

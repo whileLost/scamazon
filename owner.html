@@ -906,6 +906,7 @@
 
         function removeListing(id) {
             askDelete('Delete Listing', `Delete this listing? It won't come back.`, async () => {
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('listings').delete().eq('id', id);
                 if (error) throw error;
                 state.listings = state.listings.filter(x => x.id !== id);
@@ -914,6 +915,7 @@
         }
 
         document.getElementById('listing-form').addEventListener('submit', async (e) => {
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const btn = document.getElementById('modal-submit-btn');
             const err = document.getElementById('listingError');
@@ -1023,6 +1025,7 @@
                 : `Are you sure you want to permanently delete location "${sfName}"? This action cannot be undone.`;
 
             askDelete('Delete Storefront', message, async () => {
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('storefronts').delete().eq('id', id);
                 if (error) throw error;
                 state.storefronts = state.storefronts.filter(x => x.id !== id);
@@ -1032,6 +1035,7 @@
         }
 
         document.getElementById('storefront-form').addEventListener('submit', async (e) => {
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const id = document.getElementById('sf-modal-id').value;
             const payload = {
@@ -1099,6 +1103,7 @@
 
         function removeWorker(id) {
             askDelete('Revoke Access', `Remove this worker's access?`, async () => {
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('users').delete().eq('id', id);
                 if (error) throw error;
                 state.workers = state.workers.filter(x => x.id !== id);
@@ -1125,6 +1130,7 @@
         });
 
         document.getElementById('confirm-email-form').addEventListener('submit', async (e) => {
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             if (!pendingWorker) return;
             const input = document.getElementById('confirm-email-input').value.trim();
@@ -1302,6 +1308,7 @@
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             window.location.replace('login.html');
         });

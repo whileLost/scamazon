@@ -494,11 +494,6 @@
             console.error('Uncaught Async Error:', event.reason);
         });
 
-        const client = window.supabase.createClient(
-            'https://wtcqblyyprofjocksdij.supabase.co',
-            'sb_publishable_NUGKinF4M3L0vShVUX2xzg_-UiMum75'
-        );
-
         let currentWorker = null;
 
         const state = {
@@ -596,6 +591,8 @@
         }
 
         async function init() {
+            const { client } = await import('./supaBase.js');
+
             try {
                 const { data: { session }, error: sessionErr } = await client.auth.getSession();
                 if (sessionErr || !session) {
@@ -630,6 +627,7 @@
         }
 
         async function loadAll() {
+            const { client } = await import('./supaBase.js');
             if (!currentWorker.storefront) return;
 
             const [listRes, ordRes] = await Promise.all([
@@ -759,6 +757,7 @@
 
         function removeListing(id) {
             askDelete('Delete Listing', `Delete this listing? It won't come back.`, async () => {
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('listings').delete().eq('id', id).eq('storefront', currentWorker.storefront);
                 if (error) throw error;
                 state.listings = state.listings.filter(x => x.id !== id);
@@ -767,6 +766,7 @@
         }
 
         document.getElementById('listing-form').addEventListener('submit', async (e) => {
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const btn = document.getElementById('modal-submit-btn');
             const err = document.getElementById('listingError');
@@ -1257,6 +1257,7 @@
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             window.location.replace('login.html');
         });

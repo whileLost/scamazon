@@ -256,18 +256,43 @@
         {
             try
             {
+                const navbar = document.getElementById('navbar');
                 const { data: { session }, error } = await client.auth.getSession();
                 if (error) throw error;
 
-                if (session?.user) console.log('Logged in', session.user);
-
-                if (session) {
-                    const userEmail = session.user.email;
-                    const displayName = userEmail.split('@')[0];
-                    const navbar = document.getElementById('navbar')
-
-                    console.log(session);
+                // not logged in
+                if (!session) 
+                {
+                    renderGuestNav(navbar);
+                    return;
                 }
+
+                console.log('Logged in', session.user);
+
+                const email = session.user.email;
+
+                try 
+                {
+                    const { data: userRecord, error: userErr } = await client
+                        .from('users')
+                        .select('role')
+                        .eq('email', email)
+                        .single();
+
+                    if (userErr || !userRecord)
+                    {
+                        console.error('Error fetching role:', userErr);
+                        renderGuestNav(navbar);
+                        return;
+                    }
+
+                    renderRoleNav(navbar, userRecord.role);
+                } 
+                catch (fetchErr)
+                {
+                    console.error('Failed to load user state:', fetchErr);
+                }
+
             }
             catch (authError)
             {
@@ -289,6 +314,57 @@
         {
             console.error('Animation failed', domError.message || domError);
         }
+
+        function renderGuestNav(navbar)
+        {
+            navbar.innerHTML = `
+                <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Home
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Pricing
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Meet the Team
+                </a>
+                <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Log In
+                </a>
+                <a href="login.html?mode=signup" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    Sign Up
+                </a>
+            `;
+        }
+
+        function renderRoleNav(navbar, role)
+        {
+            navbar.innerHTML = `
+                <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Welcome, ${role}!
+                </a>
+                <a href="owner.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Dashboard
+                </a>
+                <a href="" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Meet the Team
+                </a>
+                <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">
+                    Log In
+                </a>
+                <a id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">
+                    Sign Out
+                </a>
+            `;
+        }
+
+        document.addEventListener('click', async (event) => {
+            if (event.target.matches("#logout-btn"))
+            {   
+                console.log('touched')
+                await client.auth.signOut();
+                window.location.reload();
+            }
+        });
 
         initialize();
     </script>

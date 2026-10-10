@@ -809,8 +809,9 @@
             .addEventListener('submit', async (event) => {
                 event.preventDefault();
 
+                const form = event.currentTarget;
                 const message = document.getElementById('coupon-message');
-                const button = event.currentTarget.querySelector('button[type="submit"]');
+                const button = form.querySelector('button[type="submit"]');
 
                 message.textContent = '';
 
@@ -832,7 +833,7 @@
                     message.className =
                         'text-sm mt-4 text-emerald-600';
 
-                    event.currentTarget.reset();
+                    form.reset();
 
                 } catch (error) {
                     message.textContent = error.code === '23505'

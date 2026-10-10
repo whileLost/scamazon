@@ -773,30 +773,30 @@
 
 
         // COUPONS & DISCOUNTS
-        function getCouponFormData() {
+                function getCouponFormData() {
             const code = document.getElementById('coupon-code')
                 .value.trim().toUpperCase();
-        
+
             const storefront = document.getElementById('coupon-storefront').value;
             const discountType = document.getElementById('coupon-type').value;
             const discountValue = Number(
                 document.getElementById('coupon-value').value
             );
-        
+
             if (!/^[A-Z0-9_-]{3,32}$/.test(code)) {
                 throw new Error('Enter a valid coupon code (3-32 characters).');
             }
-        
+
             if (!storefront) {
                 throw new Error('Select a storefront.');
             }
-        
+
             if (!Number.isFinite(discountValue) ||
                 discountValue <= 0 ||
                 (discountType === 'percent' && discountValue > 100)) {
                 throw new Error('Enter a valid discount amount.');
             }
-        
+
             return {
                 code,
                 storefront,
@@ -804,8 +804,46 @@
                 discount_value: discountValue
             };
         }
-        
-       document.getElementById('coupon-form')
+
+        async function loadCoupons() {
+            const list = document.getElementById('coupons-list');
+
+            list.textContent = 'Loading coupons...';
+
+            const { data, error } = await client
+                .from('coupons')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                list.textContent = `Error loading coupons: ${error.message}`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                list.textContent = 'No coupons found.';
+                return;
+            }
+
+            list.innerHTML = data.map(coupon => {
+                const discount = coupon.discount_type === 'percent'
+                    ? `${Number(coupon.discount_value)}%`
+                    : `$${Number(coupon.discount_value).toFixed(2)}`;
+
+                return `
+                    <div class="border border-slate-200 rounded-lg p-3">
+                        <div class="font-semibold text-slate-900">
+                            ${sanitizeHtml(coupon.code)}
+                        </div>
+                        <div class="text-sm text-slate-500">
+                            ${sanitizeHtml(coupon.storefront)} — ${discount} off
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('coupon-form')
             .addEventListener('submit', async (event) => {
                 event.preventDefault();
 
@@ -834,6 +872,8 @@
                         'text-sm mt-4 text-emerald-600';
 
                     form.reset();
+
+                    await loadCoupons();
 
                 } catch (error) {
                     message.textContent = error.code === '23505'

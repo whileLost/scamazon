@@ -691,6 +691,10 @@
                 sales: 'Sales & Analytics'
             };
             document.getElementById('page-heading').textContent = titles[tab] || 'Dashboard';
+        
+                if (tab === 'coupons') {
+                    loadCoupons();
+                }
         }
 
         async function init() {

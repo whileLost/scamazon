@@ -223,4 +223,142 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Uncaught Async Error:', event.reason);
+        });
+
+        // Billing toggle 
+        try {
+            const toggleBtn = document.getElementById('billing-toggle');
+            const toggleCircle = document.getElementById('toggle-circle');
+            const monthlyLabel = document.getElementById('monthly-label');
+            const yearlyLabel = document.getElementById('yearly-label');
+            
+            const proPrice = document.getElementById('pro-price');
+            const proPeriod = document.getElementById('pro-period');
+            const proSavings = document.getElementById('pro-savings');
+
+            const enterprisePrice = document.getElementById('enterprise-price');
+            const enterprisePeriod = document.getElementById('enterprise-period');
+            const enterpriseSavings = document.getElementById('enterprise-savings');
+
+            let isYearly = false;
+
+            toggleBtn.addEventListener('click', () => {
+                isYearly = !isYearly;
+                toggleBtn.setAttribute('aria-checked', isYearly);
+
+                if (isYearly) {
+                    toggleCircle.classList.remove('translate-x-0');
+                    toggleCircle.classList.add('translate-x-5');
+                    
+                    monthlyLabel.classList.replace('text-slate-900', 'text-slate-500');
+                    monthlyLabel.classList.replace('font-semibold', 'font-medium');
+
+                    yearlyLabel.classList.replace('text-slate-500', 'text-slate-900');
+                    yearlyLabel.classList.replace('font-medium', 'font-semibold');
+
+                    // Update prices with 20% discount calculated annually
+                    proPrice.textContent = '$23';
+                    proPeriod.textContent = ' / month, billed annually';
+                    proSavings.textContent = 'Save $72 per year!';
+
+                    enterprisePrice.textContent = '$79';
+                    enterprisePeriod.textContent = ' / month, billed annually';
+                    enterpriseSavings.textContent = 'Save $240 per year!';
+                } else {
+                    toggleCircle.classList.remove('translate-x-5');
+                    toggleCircle.classList.add('translate-x-0');
+
+                    monthlyLabel.classList.replace('text-slate-500', 'text-slate-900');
+                    monthlyLabel.classList.replace('font-medium', 'font-semibold');
+
+                    yearlyLabel.classList.replace('text-slate-900', 'text-slate-500');
+                    yearlyLabel.classList.replace('font-semibold', 'font-medium');
+
+                    // Revert to monthly
+                    proPrice.textContent = '$29';
+                    proPeriod.textContent = ' / month';
+                    proSavings.textContent = '';
+
+                    enterprisePrice.textContent = '$99';
+                    enterprisePeriod.textContent = ' / month';
+                    enterpriseSavings.textContent = '';
+                }
+            });
+        } catch (toggleErr) {
+            console.error('Toggle initialization failed:', toggleErr);
+        }
+
+        async function initialize() {
+            try {
+                const { client } = await import('./supaBase.js');
+                const navbar = document.getElementById('navbar');
+                const { data: { session }, error } = await client.auth.getSession();
+                if (error) throw error;
+
+                if (!session) {
+                    renderGuestNav(navbar);
+                    return;
+                }
+
+                const email = session.user.email;
+                const { data: userRecord, error: userErr } = await client
+                    .from('users')
+                    .select('role')
+                    .eq('email', email)
+                    .single();
+
+                if (userErr || !userRecord) {
+                    renderGuestNav(navbar);
+                    return;
+                }
+
+                renderRoleNav(navbar, userRecord.role);
+            } catch (authError) {
+                console.warn('Supabase session check skipped or failed:', authError.message || authError);
+            }
+        }
+
+        function renderGuestNav(navbar) {
+            navbar.innerHTML = `
+                <a href="index.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">Home</a>
+                <a href="plans.html" class="tracking-tight text-indigo-600 font-semibold hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">Pricing</a>
+                <a href="#" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">Meet the Team</a>
+                <a href="login.html" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">Log In</a>
+                <a href="login.html?mode=signup" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">Sign Up</a>
+            `;
+        }
+
+        function renderRoleNav(navbar, role) {
+            const dashboardMap = { owner: 'owner.html', customer: 'customer.html', worker: 'worker.html' };
+            const dashPage = dashboardMap[role] || 'storefront.html';
+
+            navbar.innerHTML = `
+                <a class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">${role}</a>
+                <a href="plans.html" class="tracking-tight text-indigo-600 font-semibold hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">Pricing</a>
+                <a href="${dashPage}" class="tracking-tight text-slate-900 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-slate-900 rounded-sm">Dashboard</a>
+                <a href="#" id="logout-btn" class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all duration-200">Sign Out</a>
+            `;
+        }
+
+        document.addEventListener('click', async (event) => {
+            const logout = event.target.closest("#logout-btn");
+            if (!logout) return;
+            
+            try {
+                logout.disabled = true;
+                const { client } = await import('./supaBase.js');
+                await client.auth.signOut();
+                window.location.href = 'index.html';
+            } catch (err) {
+                console.error('Logout failed:', err);
+                logout.disabled = false;
+            }
+        });
+
+        initialize();
+    </script>
 </body>

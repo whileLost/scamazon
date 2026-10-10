@@ -805,27 +805,49 @@
             };
         }
         
-        document.getElementById('coupon-form')
-            .addEventListener('submit', (event) => {
+       document.getElementById('coupon-form')
+            .addEventListener('submit', async (event) => {
                 event.preventDefault();
 
                 const message = document.getElementById('coupon-message');
+                const button = event.currentTarget.querySelector('button[type="submit"]');
+
                 message.textContent = '';
 
                 try {
                     const coupon = getCouponFormData();
 
-                    message.textContent =
-                        `Coupon ${coupon.code} validated successfully. ` +
-                        'Not saved to the database yet.';
+                    button.disabled = true;
+                    button.textContent = 'Creating...';
 
-                    message.className = 'text-sm mt-4 text-emerald-600';
+                    const { error } = await client
+                        .from('coupons')
+                        .insert(coupon);
+
+                    if (error) throw error;
+
+                    message.textContent =
+                        `Coupon ${coupon.code} created successfully!`;
+
+                    message.className =
+                        'text-sm mt-4 text-emerald-600';
+
+                    event.currentTarget.reset();
 
                 } catch (error) {
-                    message.textContent = error.message;
-                    message.className = 'text-sm mt-4 text-rose-600';
+                    message.textContent = error.code === '23505'
+                        ? 'This coupon code already exists for this storefront.'
+                        : error.message;
+
+                    message.className =
+                        'text-sm mt-4 text-rose-600';
+
+                } finally {
+                    button.disabled = false;
+                    button.textContent = 'Create Coupon';
                 }
             });
+        
         // ==========================================
         // SALES & ANALYTICS
         // ==========================================

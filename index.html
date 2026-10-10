@@ -349,6 +349,36 @@
             }
         }
 
+        // load navbar via localStorage
+        (function () {
+            try
+            {
+                const navbar = document.getElementById('navbar');
+                if (!navbar) return;
+
+                const tokenKey = 'sb-wtcqblyyprofjocksdij-auth-token';
+                const cachedSession = localStorage.getItem(tokenKey);
+                const cachedRole = localStorage.getItem('scamazon_user_role');
+
+                if (cachedSession && cachedRole) 
+                {
+                    renderRoleNav(navbar, cachedRole);
+                } 
+                else if (cachedSession) 
+                {
+                    renderRoleNav(navbar, 'customer');
+                } 
+                else 
+                {
+                    renderGuestNav(navbar);
+                }
+            }
+            catch (instantErr)
+            {
+                console.error('Instant render error:', instantErr);
+            }
+        })();
+
         async function initialize()
         {
             try 
@@ -361,6 +391,7 @@
 
                 if (!session) 
                 {
+                    localStorage.removeItem('scamazon_user_role');
                     renderGuestNav(navbar);
                     return;
                 }
@@ -382,6 +413,7 @@
                         return;
                     }
 
+                    localStorage.setItem('scamazon_user_role', userRecord.role);
                     renderRoleNav(navbar, userRecord.role);
                 } 
                 catch (fetchErr)
@@ -483,6 +515,7 @@
             {
                 logout.disabled = true;
                 const { client } = await import('./supaBase.js');
+                localStorage.removeItem('scamazon_user_role');
                 await client.auth.signOut();
                 window.location.reload();
             }

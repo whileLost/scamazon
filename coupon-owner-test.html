@@ -802,29 +802,29 @@
 
         async function loadCoupons() {
             const list = document.getElementById('coupons-list');
-
+        
             list.textContent = 'Loading coupons...';
-
+        
             const { data, error } = await client
                 .from('coupons')
                 .select('*')
                 .order('created_at', { ascending: false });
-
+        
             if (error) {
                 list.textContent = `Error loading coupons: ${error.message}`;
                 return;
             }
-
+        
             if (!data || data.length === 0) {
                 list.textContent = 'No coupons found.';
                 return;
             }
-
+        
             list.innerHTML = data.map(coupon => {
                 const discount = coupon.discount_type === 'percent'
                     ? `${Number(coupon.discount_value)}%`
                     : `$${Number(coupon.discount_value).toFixed(2)}`;
-
+        
                 return `
                     <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-4">
                         <div>
@@ -835,13 +835,26 @@
                                 ${sanitizeHtml(coupon.storefront)} — ${discount} off
                             </div>
                         </div>
-
-                        <button
-                            type="button"
-                            onclick="deleteCoupon('${sanitizeHtml(coupon.id)}')"
-                            class="text-xs font-medium text-rose-600 hover:text-rose-800 transition">
-                            Delete
-                        </button>
+        
+                        <div class="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onclick="toggleCouponStatus('${sanitizeHtml(coupon.id)}', ${coupon.is_active})"
+                                class="text-xs font-medium ${
+                                    coupon.is_active
+                                        ? 'text-amber-600 hover:text-amber-800'
+                                        : 'text-emerald-600 hover:text-emerald-800'
+                                } transition">
+                                ${coupon.is_active ? 'Disable' : 'Enable'}
+                            </button>
+        
+                            <button
+                                type="button"
+                                onclick="deleteCoupon('${sanitizeHtml(coupon.id)}')"
+                                class="text-xs font-medium text-rose-600 hover:text-rose-800 transition">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -866,6 +879,18 @@
                     await loadCoupons();
                 }
             );
+        }
+        async function toggleCouponStatus(id, isActive) {
+            const { error } = await client
+                .from('coupons')
+                .update({ is_active: !isActive })
+                .eq('id', id);
+
+            if (error) {
+                throw error;
+            }
+
+            await loadCoupons();
         }
 
         document.getElementById('coupon-form')

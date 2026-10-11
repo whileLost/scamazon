@@ -36,33 +36,41 @@
             <span class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">owner</span>
         </div>
         <nav class="flex-1 p-3 space-y-1 text-sm font-medium overflow-y-auto" id="sidebar-nav">
-            <button onclick="switchTab('listings')" data-tab="listings" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10 transition-all">
+
+            <button onclick="switchTab('coupons')" data-tab="coupons"
+                class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+                Coupons & Discounts
+            </button>
+
+            <button onclick="switchTab('listings')" data-tab="listings"
+                class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10 transition-all">
                 Listings
                 <span id="badge-listings" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono">0</span>
             </button>
-            <button
-                onclick="switchTab('coupons')"
-                data-tab="coupons"
-                class="nav-item w-full text-left px-3 py-2 rounded-lg
-               flex items-center justify-between hover:bg-slate-100
-               text-slate-600 hover:text-slate-900 transition-all">
-                Coupons & Discounts
-            </button>
-            <button onclick="switchTab('storefronts')" data-tab="storefronts" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
-                Storefronts
-                <span id="badge-storefronts" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
-            </button>
-            <button onclick="switchTab('workers')" data-tab="workers" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
-                Workers
-                <span id="badge-workers" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
-            </button>
-            <button onclick="switchTab('orders')" data-tab="orders" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+
+            <button onclick="switchTab('orders')" data-tab="orders"
+                class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
                 Orders
                 <span id="badge-orders" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
             </button>
-            <button onclick="switchTab('sales')" data-tab="sales" class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+
+            <button onclick="switchTab('sales')" data-tab="sales"
+                class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
                 Sales & Analytics
             </button>
+
+            <button onclick="switchTab('storefronts')" data-tab="storefronts"
+                class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+                Storefronts
+                <span id="badge-storefronts" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
+            </button>
+
+            <button onclick="switchTab('workers')" data-tab="workers"
+                class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
+                Workers
+                <span id="badge-workers" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
+            </button>
+
         </nav>
     </aside>
 
@@ -691,10 +699,10 @@
                 sales: 'Sales & Analytics'
             };
             document.getElementById('page-heading').textContent = titles[tab] || 'Dashboard';
-        
-                if (tab === 'coupons') {
-                    loadCoupons();
-                }
+            
+            if (tab === 'coupons') {
+                loadCoupons();
+            }
         }
 
         async function init() {
@@ -749,35 +757,41 @@
         function syncDropdowns() {
             const activeOptions = state.storefronts
                 .filter(s => s.status === 'Active')
+                .sort((a, b) => a.name.localeCompare(b.name))
                 .map(s => `<option value="${sanitizeHtml(s.name)}">${sanitizeHtml(s.name)}</option>`)
                 .join('');
 
             ['filter-storefront', 'worker-filter-storefront'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.innerHTML =
-                    '<option value="">All Storefronts</option>' + activeOptions;
+
+                if (el) {
+                    el.innerHTML =
+                        '<option value="">All Storefronts</option>' + activeOptions;
+                }
             });
-        
+
             ['modal-storefront', 'worker-storefront'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.innerHTML = activeOptions;
+
+                if (el) {
+                    el.innerHTML = activeOptions;
+                }
             });
-        
-            // Populate coupon storefront dropdown.
-            const couponDropdown = document.getElementById('coupon-storefront');
-        
+
+            const couponDropdown =
+                document.getElementById('coupon-storefront');
+
             if (couponDropdown) {
                 couponDropdown.innerHTML =
                     '<option value="">Select Storefront</option>' +
                     '<option value="GameFlop">GameFlop</option>' +
-                    '<option value="Stater Girls">Stater Girls</option>' +
-                    '<option value="Riverside Auto Parts">Riverside Auto Parts</option>';
+                    '<option value="Riverside Auto Parts">Riverside Auto Parts</option>' +
+                    '<option value="Stater Girls">Stater Girls</option>';
             }
         }
 
-
         // COUPONS & DISCOUNTS
-                function getCouponFormData() {
+        function getCouponFormData() {
             const code = document.getElementById('coupon-code')
                 .value.trim().toUpperCase();
 
@@ -835,16 +849,42 @@
                     : `$${Number(coupon.discount_value).toFixed(2)}`;
 
                 return `
-                    <div class="border border-slate-200 rounded-lg p-3">
-                        <div class="font-semibold text-slate-900">
-                            ${sanitizeHtml(coupon.code)}
+                    <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-4">
+                        <div>
+                            <div class="font-semibold text-slate-900">
+                                ${sanitizeHtml(coupon.code)}
+                            </div>
+                            <div class="text-sm text-slate-500">
+                                ${sanitizeHtml(coupon.storefront)} — ${discount} off
+                            </div>
                         </div>
-                        <div class="text-sm text-slate-500">
-                            ${sanitizeHtml(coupon.storefront)} — ${discount} off
-                        </div>
+
+                        <button
+                            type="button"
+                            onclick="deleteCoupon('${sanitizeHtml(coupon.id)}')"
+                            class="text-xs font-medium text-rose-600 hover:text-rose-800 transition">
+                            Delete
+                        </button>
                     </div>
                 `;
             }).join('');
+        }
+
+        function deleteCoupon(id) {
+            askDelete(
+                'Delete Coupon',
+                'Delete this coupon? It cannot be undone.',
+                async () => {
+                    const { error } = await client
+                        .from('coupons')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+
+                    await loadCoupons();
+                }
+            );
         }
 
         document.getElementById('coupon-form')

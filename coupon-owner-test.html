@@ -36,29 +36,24 @@
             <span class="text-[11px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 font-mono">owner</span>
         </div>
         <nav class="flex-1 p-3 space-y-1 text-sm font-medium overflow-y-auto" id="sidebar-nav">
-
             <button onclick="switchTab('coupons')" data-tab="coupons"
                 class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
                 Coupons & Discounts
             </button>
-
             <button onclick="switchTab('listings')" data-tab="listings"
                 class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between bg-slate-900 text-white shadow-sm shadow-slate-900/10 transition-all">
                 Listings
                 <span id="badge-listings" class="text-xs bg-slate-800 text-slate-200 px-2 py-0.5 rounded-md font-mono">0</span>
             </button>
-
             <button onclick="switchTab('orders')" data-tab="orders"
                 class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
                 Orders
                 <span id="badge-orders" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
             </button>
-
             <button onclick="switchTab('sales')" data-tab="sales"
                 class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
                 Sales & Analytics
             </button>
-
             <button onclick="switchTab('storefronts')" data-tab="storefronts"
                 class="nav-item w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all">
                 Storefronts
@@ -70,7 +65,6 @@
                 Workers
                 <span id="badge-workers" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono">0</span>
             </button>
-
         </nav>
     </aside>
 
@@ -148,70 +142,53 @@
 
             <!-- COUPONS TAB -->
             <section id="pane-coupons" class="tab-pane hidden space-y-6">
-            
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            
                     <h2 class="text-lg font-bold mb-2">
                         Manage Coupons & Discounts
                     </h2>
-            
                     <p class="text-sm text-slate-500 mb-6">
                         Create and manage discount codes for your storefronts.
                     </p>
-            
                     <form id="coupon-form"
-                        class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
+                        class="grid grid-cols-1 md:grid-cols-2 gap-4">        
                         <input id="coupon-code"
                             type="text"
                             placeholder="Coupon Code"
                             maxlength="32"
                             required
-                            class="border rounded-lg px-4 py-2">
-            
+                            class="border rounded-lg px-4 py-2">          
                         <select id="coupon-storefront"
                             required
                             class="border rounded-lg px-4 py-2">
                             <option value="">Select Storefront</option>
                         </select>
-            
                         <select id="coupon-type"
                             class="border rounded-lg px-4 py-2">
                             <option value="percent">Percentage (%)</option>
                             <option value="fixed">Fixed Amount ($)</option>
-                        </select>
-            
+                        </select>    
                         <input id="coupon-value"
                             type="number"
                             min="0.01"
                             step="0.01"
                             placeholder="Discount Value"
                             required
-                            class="border rounded-lg px-4 py-2">
-            
+                            class="border rounded-lg px-4 py-2">      
                         <button type="submit"
                             class="bg-slate-900 text-white rounded-lg px-4 py-2">
                             Create Coupon
                         </button>
-            
-                    </form>
-            
-                    <p id="coupon-message" class="text-sm mt-4"></p>
-            
+                    </form>            
+                    <p id="coupon-message" class="text-sm mt-4"></p>            
                 </div>
-            
-                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            
+                    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h2 class="font-bold mb-4">
                         Existing Coupons
-                    </h2>
-            
+                    </h2> 
                     <div id="coupons-list" class="space-y-3">
                         No coupons loaded.
                     </div>
-            
-                </div>
-            
+                </div>        
             </section>
             <!-- STOREFRONTS TAB -->
             <section id="pane-storefronts" class="tab-pane hidden space-y-6">
@@ -881,6 +858,10 @@
                         .eq('id', id);
 
                     if (error) throw error;
+
+                    const message = document.getElementById('coupon-message');
+                    message.textContent = '';
+                    message.className = 'text-sm mt-4';
 
                     await loadCoupons();
                 }

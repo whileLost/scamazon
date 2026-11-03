@@ -106,7 +106,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         async function init() {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
 
             try {
                 const { data: { session }, error: sessionErr } = await client.auth.getSession();
@@ -136,7 +136,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         async function loadAll() {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
 
             const [sfRes, listRes, workRes, ordRes] = await Promise.all([
                 client.from('storefronts').select('*').order('created_at', { ascending: false }),
@@ -224,7 +224,7 @@ window.addEventListener('unhandledrejection', (event) => {
             list.innerHTML = '<p class="text-xs text-slate-500 dark:text-slate-400">Loading coupons...</p>';
 
             try {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const { data, error } = await client
                     .from('coupons')
                     .select('*')
@@ -300,7 +300,7 @@ window.addEventListener('unhandledrejection', (event) => {
                 'Delete Coupon',
                 'Delete this coupon? It cannot be undone.',
                 async () => {
-                    const { client } = await import('./js/supaBase.js');
+                    const { client } = await import('./supaBase.js');
                     const { error } = await client
                         .from('coupons')
                         .delete()
@@ -320,7 +320,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
         async function toggleCouponStatus(id, isActive) {
             try {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const { error } = await client
                     .from('coupons')
                     .update({ is_active: !isActive })
@@ -354,7 +354,7 @@ window.addEventListener('unhandledrejection', (event) => {
                     button.disabled = true;
                     button.textContent = 'Creating...';
 
-                    const { client } = await import('./js/supaBase.js');
+                    const { client } = await import('./supaBase.js');
                     const { error } = await client
                         .from('coupons')
                         .insert(coupon);
@@ -596,7 +596,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
         function removeListing(id) {
             askDelete('Delete Listing', `Delete this listing? It won't come back.`, async () => {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('listings').delete().eq('id', id);
                 if (error) throw error;
                 state.listings = state.listings.filter(x => x.id !== id);
@@ -605,7 +605,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         document.getElementById('listing-form').addEventListener('submit', async (e) => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const btn = document.getElementById('modal-submit-btn');
             const err = document.getElementById('listingError');
@@ -717,7 +717,7 @@ window.addEventListener('unhandledrejection', (event) => {
                 : `Are you sure you want to permanently delete location "${sfName}"? This action cannot be undone.`;
 
             askDelete('Delete Storefront', message, async () => {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('storefronts').delete().eq('id', id);
                 if (error) throw error;
                 state.storefronts = state.storefronts.filter(x => x.id !== id);
@@ -727,7 +727,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         document.getElementById('storefront-form').addEventListener('submit', async (e) => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const id = document.getElementById('sf-modal-id').value;
             const payload = {
@@ -795,7 +795,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
         function removeWorker(id) {
             askDelete('Revoke Access', `Remove this worker's access?`, async () => {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('users').delete().eq('id', id);
                 if (error) throw error;
                 state.workers = state.workers.filter(x => x.id !== id);
@@ -822,7 +822,7 @@ window.addEventListener('unhandledrejection', (event) => {
         });
 
         document.getElementById('confirm-email-form').addEventListener('submit', async (e) => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             if (!pendingWorker) return;
             const input = document.getElementById('confirm-email-input').value.trim();
@@ -912,7 +912,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         async function updateOrderStatus(orderId, newStatus) {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             const order = state.orders.find(o => o.id === orderId);
             if (!order) return;
 
@@ -1054,7 +1054,7 @@ window.addEventListener('unhandledrejection', (event) => {
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             window.location.replace('./');
         });

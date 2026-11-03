@@ -102,7 +102,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         async function init() {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
 
             try {
                 const { data: { session }, error: sessionErr } = await client.auth.getSession();
@@ -138,7 +138,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         async function loadAll() {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             if (!currentWorker.storefront) return;
 
             const [listRes, ordRes] = await Promise.all([
@@ -272,7 +272,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
         function removeListing(id) {
             askDelete('Delete Listing', `Delete this listing? It won't come back.`, async () => {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const { error } = await client.from('listings').delete().eq('id', id).eq('storefront', currentWorker.storefront);
                 if (error) throw error;
                 state.listings = state.listings.filter(x => x.id !== id);
@@ -281,7 +281,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         document.getElementById('listing-form').addEventListener('submit', async (e) => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             e.preventDefault();
             const btn = document.getElementById('modal-submit-btn');
             const err = document.getElementById('listingError');
@@ -688,7 +688,7 @@ window.addEventListener('unhandledrejection', (event) => {
         }
 
         async function updateOrderStatus(orderId, newStatus) {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             const order = state.orders.find(o => o.id === orderId);
             if (!order) return;
 
@@ -834,7 +834,7 @@ window.addEventListener('unhandledrejection', (event) => {
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             window.location.replace('./');
         });

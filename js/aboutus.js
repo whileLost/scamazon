@@ -314,7 +314,7 @@ import { setupNav } from './shared-nav.js';
             try
             {
                 logout.disabled = true;
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 localStorage.removeItem('scamazon_user_role');
                 await client.auth.signOut();
                 window.location.reload();

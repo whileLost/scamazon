@@ -309,7 +309,7 @@ function toggleDarkMode()
                 if (submitText) submitText.textContent = 'Sending Link...';
 
                 try {
-                    const { client } = await import('./js/supaBase.js');
+                    const { client } = await import('./supaBase.js');
                     const redirectUrl = window.location.origin + window.location.pathname;
                     const { error } = await client.auth.resetPasswordForEmail(email, {
                         redirectTo: redirectUrl
@@ -357,7 +357,7 @@ function toggleDarkMode()
                 if (submitText) submitText.textContent = 'Updating Password...';
 
                 try {
-                    const { client } = await import('./js/supaBase.js');
+                    const { client } = await import('./supaBase.js');
                     const { error } = await client.auth.updateUser({
                         password: password
                     });
@@ -396,7 +396,7 @@ function toggleDarkMode()
             if (submitText) submitText.textContent = currentAuthMode === 'signup' ? 'Creating Account...' : 'Signing In...';
 
             try {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
 
                 if (currentAuthMode === 'signup') {
                     const name = nameInput ? nameInput.value.trim() : '';
@@ -641,7 +641,7 @@ function toggleDarkMode()
         /* --- SESSION & AUTH STATE --- */
         async function checkSession() {
             try {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
 
                 // Listen for Auth state changes including password recovery
                 client.auth.onAuthStateChange(async (event, session) => {
@@ -791,13 +791,13 @@ function toggleDarkMode()
 
         // ================= LISTINGS =================
         async function fetchStorefronts() {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             const { data } = await client.from('storefronts').select('*').eq('status', 'Active');
             activeStorefronts = data || [];
         }
 
         async function fetchListings() {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             const { data } = await client.from('listings').select('*');
             allListings = data || [];
             const badge = document.getElementById('badge-listings');
@@ -1241,7 +1241,7 @@ function updateCartUI() {
             }
 
             try {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
 
                 // The redesigned cart may contain products from multiple storefronts.
                 // Validate this code securely against each storefront represented
@@ -1435,7 +1435,7 @@ function updateCartUI() {
                 return;
             }
 
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
 
             const orderBtn = document.getElementById('order-btn');
             orderBtn.disabled = true;
@@ -1848,7 +1848,7 @@ function updateCartUI() {
             // Because Supabase RLS now restricts customers to their own orders,
             // any deleted or inaccessible local order references are removed.
             try {
-                const { client } = await import('./js/supaBase.js');
+                const { client } = await import('./supaBase.js');
                 const orderNumbers = storedOrders.map(o => o.order_number);
 
                 const { data: liveOrders, error } = await client
@@ -2002,7 +2002,7 @@ function updateCartUI() {
                 return;
             }
 
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             const rawQuery = (document.getElementById('tracking-input').value || '').trim();
             if (!rawQuery) return;
 
@@ -2192,7 +2192,7 @@ function updateCartUI() {
         }
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
-            const { client } = await import('./js/supaBase.js');
+            const { client } = await import('./supaBase.js');
             await client.auth.signOut();
             currentUser = null;
             updateNavAuthUI();

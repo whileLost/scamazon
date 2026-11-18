@@ -755,5 +755,14 @@
     <!-- ================= CLIENT SCRIPTS ================= -->
     <script src="js/index.js?v=2.0.1"></script>
     <script src="js/branch-switcher.js?v=2.0.1" defer></script>
+
+    <!-- ================= AI SUPPORT CHAT ================= -->
+    <script type="module">
+    import { initSupportChat } from './js/customer-support-ai.js';
+    initSupportChat({
+        mock: true,
+        getListings: () => (typeof allListings !== 'undefined' ? allListings : [])
+    });
+</script>
 </body>
 </html>

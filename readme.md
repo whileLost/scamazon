@@ -48,7 +48,7 @@
       * Tracking 🔴
     * Scanner (camera QR/barcode scan) 🔴
   * **Customer**
-    * AI assistant / chat support 🔴
+    * AI assistant / chat support 🟡
     * Listings
       * Sort 🔴
       * Filters 🔴
@@ -69,3 +69,4 @@ Software Engineers:
 - Enzo Cayetano (enzoCayetano)
 - Eduardo Quezada (Equezada-4)
 - Adrian Leal (adrianlealcsusb)
+- Gabriel Felix (gabeaf3lix04)

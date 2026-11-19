@@ -14,7 +14,7 @@
             #scamazon-branch-switcher {
                 position: fixed;
                 bottom: 20px;
-                right: 20px;
+                left: 20px;
                 z-index: 999999;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
                 font-size: 13px;

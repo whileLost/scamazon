@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Total Taxes and Shipping Calculations</title>
+</head>
+<body>
+<div>
+  <p>Subtotal: $<span id="subtotal"></span></p>
+  <p>Shipping: $<span id="shipping"></span></p>
+  <p>Sales Tax: $<span id="tax"></span></p>
+  <h3>Total: $<span id="total"></span></h3>
+</div>
+<script src="TaxesAndShipping.js"></script>
+<script>
+<!-- Example of calculateOrder -->
+const order = calculateOrder({
+  subtotal: 100,
+  weight: 5,
+  length: 12,
+  width: 10,
+  height: 8,
+  shippingMethod: "standard",
+  taxRate: 8.5
+});
+<!-- Get information from JavaScript file -->
+document.getElementById("subtotal").textContent =
+  order.subtotal.toFixed(2);
+  
+document.getElementById("shipping").textContent =
+  order.shipping.toFixed(2);
+  
+document.getElementById("tax").textContent =
+  order.tax.toFixed(2);
+  
+document.getElementById("total").textContent =
+  order.total.toFixed(2);
+</script>
+</body>
+</html>

@@ -5,7 +5,7 @@
       * Add 🟢
       * Remove 🟢
       * Edit 🟢
-      * Manage coupons/discounts 🔴
+      * Manage coupons/discounts 🟢
     * Manage Storefronts
       * Add 🟢
       * Edit 🟢
@@ -17,25 +17,23 @@
       * Set status 🟢
     * Orders 
       * View 🟢
-      * Set status🔴
-      * Receipts/invoice 🔴
-      * Tracking 🔴
+      * Set status 🟢
+      * Receipts/invoice 🟢
   * **Storefront**
     * AI Overview 🔴
     * Listings
       * Add 🟢
       * Remove 🟢
       * Edit 🟢
-      * Manage coupons/discounts 🔴
+      * Manage coupons/discounts 🟢
     * Workers
       * Add 🟢
       * Revoke 🟢
       * Set status 🟢
     * Orders 
       * View 🟢
-      * Set status🔴
-      * Receipts/invoice 🔴
-      * Tracking 🔴
+      * Set status 🟢
+      * Receipts/invoice 🟢
   * **Worker**
     * Listings
       * Add 🟢
@@ -43,21 +41,20 @@
       * Edit 🟢
     * Orders 
       * View 🟢
-      * Set status🔴
-      * Receipts/invoice 🔴
-      * Tracking 🔴
-    * Scanner (camera QR/barcode scan) 🔴
+      * Set status 🟢
+      * Receipts/invoice 🟢
+    * Scanner (camera QR/barcode scan) 🟢
   * **Customer**
     * AI assistant / chat support 🔴
     * Listings
-      * Sort 🔴
-      * Filters 🔴
-      * Add to cart 🟡
-      * Coupons/discounts 🔴
+      * Sort 🟢
+      * Filters 🟢
+      * Add to cart 🟢
+      * Coupons/discounts 🟢
     * Orders
-      * View history 🔴
-      * Receipts/invoices 🟡
-      * Track 🟡
+      * View history 🟢
+      * Receipts/invoices 🟢
+      * Track 🟢
       * Refund/cancel 🔴
    
 🟢: implemented  

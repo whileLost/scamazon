@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Scamazon Payment Plans</title>
+    <!-- Link Javascript file -->
+    <script src="PlanPayment.js" defer></script>
+</head>
+<body>
+    <h1>Scamazon Payment Plans</h1>
+    <div class="product">
+        <h2>Product</h2>
+        <!-- Enter purchase amount -->
+        <p>Enter your purchase amount below.</p>
+    </div>
+    <label for="price">Purchase Amount ($)</label>
+    <input
+        type="number"
+        id="price"
+        value="0"
+        min="0.01"
+        max="1000000"
+        step="0.01"
+        required
+    >
+    <!-- Choose payment plan -->
+    <h3>Choose Your Payment Plan</h3>
+    <div class="plans">
+        <label>
+            <input type="radio" name="months" value="3">
+            3 Months
+        </label>
+        <label>
+            <input type="radio" name="months" value="6" checked>
+            6 Months
+        </label>
+        <label>
+            <input type="radio" name="months" value="12">
+            12 Months
+        </label>
+    </div>
+    <div class="payment-result">
+        <p>Interest Rate: <strong>35% APR</strong></p>
+        <!-- Display monthly payemnt -->
+        <h2 id="monthlyPayment">$0.00</h2>
+        <p>Estimated Regular Monthly Payment</p>
+        <p>
+            Total Payment:
+            <strong id="totalPayment">$0.00</strong>
+        </p>
+        <p>
+            Total Interest:
+            <strong id="totalInterest">$0.00</strong>
+        </p>
+        <p id="finalPaymentNote"></p>
+    </div>
+    <!-- Display payment schedule -->
+    <h3>Payment Schedule</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Payment</th>
+                <th>Interest</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody id="paymentSchedule"></tbody>
+    </table>
+    <!-- Confirm chosen payment plan -->
+    <button id="confirmButton" disabled>
+        Confirm Payment Plan
+    </button>
+    <p id="confirmation" aria-live="polite"></p>
+</body>
+</html>
